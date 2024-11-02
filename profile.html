@@ -12,8 +12,7 @@
             --background-color: #f5f7fa;
             --text-color: #333;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --success-color: #28a745;
-            --error-color: #dc3545;
+            --sidebar-width: 250px;
         }
 
         * {
@@ -25,80 +24,96 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
+            display: flex;
             min-height: 100vh;
         }
 
-        .navbar {
-            background-color: var(--primary-color);
-            padding: 1rem 2rem;
-            color: white;
-        }
-
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 2rem;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .logout-button {
-            background-color: transparent;
-            border: 1px solid white;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .logout-button:hover {
+        .sidebar {
+            width: var(--sidebar-width);
             background-color: white;
+            border-right: 1px solid #eaeaea;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: bold;
             color: var(--primary-color);
         }
 
-        .main-container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+        .nav-menu {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: #666;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2rem;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .profile-header {
             background-color: white;
-            border-radius: 12px;
             padding: 2rem;
+            border-radius: 12px;
             margin-bottom: 2rem;
             box-shadow: var(--card-shadow);
             display: flex;
@@ -117,16 +132,17 @@
             font-size: 3rem;
             color: var(--primary-color);
             font-weight: bold;
-            position: relative;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
-        .profile-picture:hover::after {
-            content: 'Change Photo';
+        .profile-picture input[type="file"] {
             position: absolute;
-            bottom: -20px;
-            font-size: 0.875rem;
-            color: var(--secondary-color);
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
         }
 
         .profile-info h1 {
@@ -134,35 +150,19 @@
             margin-bottom: 0.5rem;
         }
 
-        .profile-info p {
-            color: #666;
-        }
-
-        .profile-sections {
-            display: grid;
-            gap: 2rem;
-        }
-
-        .section-card {
+        .profile-section {
             background-color: white;
-            border-radius: 12px;
             padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
             box-shadow: var(--card-shadow);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--background-color);
         }
 
         .section-title {
             color: var(--primary-color);
-            font-size: 1.25rem;
-            font-weight: bold;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--background-color);
         }
 
         .form-grid {
@@ -172,7 +172,8 @@
         }
 
         .form-group {
-            display: grid;
+            display: flex;
+            flex-direction: column;
             gap: 0.5rem;
         }
 
@@ -190,7 +191,6 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 1rem;
-            width: 100%;
         }
 
         textarea {
@@ -198,56 +198,50 @@
             min-height: 100px;
         }
 
-        .courses-list {
-            display: grid;
-            gap: 1rem;
+        .transcript-section {
+            margin-top: 2rem;
         }
 
-        .course-entry {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 1rem;
-            align-items: start;
-        }
-
-        .button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
+        .upload-container {
+            border: 2px dashed #ddd;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 1rem;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            border: none;
+            transition: border-color 0.3s ease;
         }
 
-        .button-primary {
-            background-color: var(--secondary-color);
-            color: white;
+        .upload-container:hover {
+            border-color: var(--secondary-color);
         }
 
-        .button-secondary {
-            background-color: transparent;
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-        }
-
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .remove-button {
-            background-color: var(--error-color);
-            color: white;
-            padding: 0.5rem;
+        .status-message {
+            padding: 1rem;
             border-radius: 4px;
-            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-message.info {
+            background-color: #cce5ff;
+            color: #004085;
         }
 
         .skills-container {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
         .skill-tag {
@@ -262,413 +256,409 @@
         .skill-tag button {
             background: none;
             border: none;
-            color: var(--error-color);
+            color: #dc3545;
             cursor: pointer;
             font-size: 1.2rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
         }
 
-        .success-message {
-            background-color: var(--success-color);
+        .button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .button-primary {
+            background-color: var(--secondary-color);
             color: white;
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            display: none;
         }
 
-        .transcript-upload {
-            border: 2px dashed #ddd;
-            padding: 2rem;
-            text-align: center;
-            border-radius: 6px;
-            margin-top: 1rem;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
+        .button-primary:hover {
+            background-color: var(--primary-color);
         }
 
-        .transcript-upload:hover {
-            border-color: var(--secondary-color);
+        .button-secondary {
+            background-color: transparent;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
         }
 
-        .availability-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-            margin-top: 1rem;
+        .button-secondary:hover {
+            background-color: var(--secondary-color);
+            color: white;
         }
 
-        .day-column {
-            text-align: center;
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .courses-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
-        .time-slot {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            margin: 0.25rem 0;
-            cursor: pointer;
+        .courses-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .courses-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
             border-radius: 4px;
         }
 
-        .time-slot.selected {
-            background-color: var(--secondary-color);
-            color: white;
+        .courses-container::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .course-card {
+            background-color: var(--background-color);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-id {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .course-grade {
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .grade-a {
+            color: #28a745;
+        }
+
+        .grade-b {
+            color: #17a2b8;
+        }
+
+        .grade-c {
+            color: #ffc107;
+        }
+
+        .grade-other {
+            color: #dc3545;
+        }
+
+        .course-name {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .course-credits {
+            font-size: 0.8rem;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="nav-logo">BMCC Campus Jobs</div>
-            <div class="nav-links">
-                <a href="job-landing.html">Jobs</a>
-                <button class="logout-button" onclick="handleLogout()">Logout</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="main-container">
-        <div class="success-message" id="successMessage">Profile updated successfully!</div>
-
-        <div class="profile-header">
-            <div class="profile-picture" onclick="document.getElementById('photoInput').click()">
-                <span>J</span>
-                <input type="file" id="photoInput" hidden accept="image/*">
-            </div>
-            <div class="profile-info">
-                <h1>John Doe</h1>
-                <p>Computer Science Major</p>
-                <p>EMPLID: 12345678</p>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <span class="logo-text">BMCC Jobs</span>
             </div>
         </div>
 
-        <div class="profile-sections">
-            <!-- Personal Information -->
-            <section class="section-card">
-                <div class="section-header">
+        <nav class="nav-menu">
+            <a href="job-landing.html" class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Available Jobs</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-picture" onclick="document.getElementById('profilePicture').click()">
+                    <span id="profileInitial">J</span>
+                    <input type="file" id="profilePicture" accept="image/*" hidden>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profileName">John Doe</h1>
+                    <p id="profileEmail">john.doe@stu.bmcc.cuny.edu</p>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <form id="profileForm" onsubmit="handleProfileSubmit(event)">
+                <!-- Personal Information -->
+                <section class="profile-section">
                     <h2 class="section-title">Personal Information</h2>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" value="John" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" value="Doe" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" value="john.doe@stu.bmcc.cuny.edu" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" placeholder="(123) 456-7890">
-                    </div>
-                    <div class="form-group">
-                        <label for="emplid">EMPLID</label>
-                        <input type="text" id="emplid" value="12345678" pattern="\d{8}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="expectedGraduation">Expected Graduation</label>
-                        <input type="month" id="expectedGraduation">
-                    </div>
-                </div>
-            </section>
-
-            <!-- Academic Information -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2 class="section-title">Academic Information</h2>
-                    <button class="button button-secondary" id="uploadTranscriptBtn">Upload Transcript</button>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="major">Major</label>
-                        <select id="major" required>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Business Administration">Business Administration</option>
-                            <option value="Engineering">Engineering</option>
-                            <option value="Liberal Arts">Liberal Arts</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="gpa">Current GPA</label>
-                        <input type="number" id="gpa" step="0.01" min="0" max="4" placeholder="4.00">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Courses</label>
-                        <div class="courses-list" id="coursesList">
-                            <div class="course-entry">
-                                <input type="text" placeholder="Course Code (e.g., CIS 115)" required>
-                                <input type="text" placeholder="Course Name" required>
-                                <button class="remove-button" onclick="removeCourse(this)">×</button>
-                            </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="emplId">EMPLID (8 digits)</label>
+                            <input type="text" id="emplId" pattern="\d{8}" required>
                         </div>
-                        <button class="button button-secondary" onclick="addCourse()" style="margin-top: 1rem;">Add Course</button>
+                        <div class="form-group">
+                            <label for="major">Major</label>
+                            <select id="major" required>
+                                <option value="">Select your major</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Business Administration">Business Administration</option>
+                                <option value="Liberal Arts">Liberal Arts</option>
+                                <option value="Engineering">Engineering</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gpa">Current GPA</label>
+                            <input type="number" id="gpa" step="0.01" min="0" max="4" placeholder="4.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="expectedGraduation">Expected Graduation</label>
+                            <input type="month" id="expectedGraduation">
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- Skills & Experience -->
-            <section class="section-card">
-                <div class="section-header">
+                <!-- Transcript Upload -->
+                <section class="profile-section">
+                    <h2 class="section-title">Transcript Upload</h2>
+                    <div class="transcript-section">
+                        <div class="upload-container" onclick="document.getElementById('transcript').click()">
+                            <input type="file" id="transcript" accept=".pdf" hidden>
+                            <p>Click to upload your unofficial transcript (PDF)</p>
+                            <small>This will help us recommend jobs based on your academic record</small>
+                        </div>
+                        <div id="uploadStatus" class="status-message"></div>
+                    </div>
+                </section>
+
+                <!-- Skills -->
+                <section class="profile-section">
                     <h2 class="section-title">Skills & Experience</h2>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label for="skills">Skills</label>
-                        <input type="text" id="skillInput" placeholder="Type a skill and press Enter">
-                        <div class="skills-container" id="skillsContainer">
-                            <!-- Skills will be added here -->
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="skillInput">Skills</label>
+                            <input type="text" id="skillInput" placeholder="Type a skill and press Enter">
+                            <div class="skills-container" id="skillsContainer"></div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="experience">Work Experience</label>
+                            <textarea id="experience" placeholder="Describe your previous work experience..."></textarea>
                         </div>
                     </div>
-                    <div class="form-group full-width">
-                        <label for="experience">Work Experience</label>
-                        <textarea id="experience" placeholder="Describe your previous work experience..."></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Work Preferences -->
-            <section class="section-card">
-                <div class="section-header">
-                    <h2 class="section-title">Work Preferences</h2>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="preferredDepartment">Preferred Department</label>
-                        <select id="preferredDepartment">
-                            <option value="CIS">Computer Information Systems</option>
-                            <option value="Library">Library</option>
-                            <option value="Academic Affairs">Academic Affairs</option>
-                            <option value="Student Services">Student Services</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="workType">Work Type Preference</label>
-                        <select id="workType">
-                            <option value="Work Study">Work Study</option>
-                            <option value="Part-Time">Part-Time</option>
-                            <option value="Full-Time">Full-Time</option>
-                        </select>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Available Hours</label>
-                        <div class="availability-grid">
-                            <!-- Days of the week -->
-                            <div class="day-column">
-                                <strong>Mon</strong>
-                                <div class="time-slot" onclick="toggleTimeSlot(this)">Morning</div>
-                                <div class="time-slot" onclick="toggleTimeSlot(this)">Afternoon</div>
-                                <div class="time-slot" onclick="toggleTimeSlot(this)">Evening</div>
-                            </div>
-                            <!-- Repeat for other days -->
+                </section>
+                <!-- Courses -->
+                <section class="profile-section">
+                    <h2 class="section-title">Course History</h2>
+                    <div class="courses-container">
+                        <div class="courses-grid" id="coursesGrid">
+                            <!-- Courses will be populated here -->
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- Save Button -->
-            <button class="button button-primary" onclick="saveProfile()" style="width: 100%;">Save Profile</button>
+                <!-- Actions -->
+                <div class="actions">
+                    <button type="button" class="button button-secondary" onclick="resetForm()">Reset</button>
+                    <button type="submit" class="button button-primary">Save Profile</button>
+                </div>
+            </form>
         </div>
-    </div>
+    </main>
 
     <script>
-        // Protect page from unauthorized access
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in
+        // Initialize profile
+        document.addEventListener('DOMContentLoaded', async function() {
             const userId = localStorage.getItem('userId');
             if (!userId) {
                 window.location.href = 'index.html';
                 return;
             }
-            initializeProfile();
-        });
-        
-        // Handle Skills
-        const skillInput = document.getElementById('skillInput');
-        const skillsContainer = document.getElementById('skillsContainer');
-        let skills = new Set();
-        
-        skillInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && this.value.trim()) {
-                e.preventDefault();
-                addSkill(this.value.trim());
-                this.value = '';
+
+            try {
+                const response = await fetch(`/api/profile/${userId}`);
+                const userData = await response.json();
+                console.log('Initial profile load:', userData); // Debug log
+                populateProfile(userData);
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showStatus('Error loading profile data', 'error');
             }
         });
-        
-        function addSkill(skillName) {
-            if (!skills.has(skillName)) {
-                skills.add(skillName);
-                const skillTag = document.createElement('div');
-                skillTag.className = 'skill-tag';
-                skillTag.innerHTML = `
-                    ${skillName}
-                    <button onclick="removeSkill(this, '${skillName}')">&times;</button>
-                `;
-                skillsContainer.appendChild(skillTag);
-            }
-        }
-        
-        function removeSkill(button, skillName) {
-            skills.delete(skillName);
-            button.parentElement.remove();
-        }
-        
-        // Toggle Time Slot Selection
-        function toggleTimeSlot(slot) {
-            slot.classList.toggle('selected');
-        }
-        
-        // Profile Picture Handling
-        const photoInput = document.getElementById('photoInput');
-        const profilePicture = document.querySelector('.profile-picture span');
-        
-        photoInput.addEventListener('change', function(e) {
+
+        // Handle profile picture
+        document.getElementById('profilePicture').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    profilePicture.style.backgroundImage = `url(${e.target.result})`;
-                    profilePicture.textContent = '';
+                    document.querySelector('.profile-picture').style.backgroundImage = `url(${e.target.result})`;
+                    document.getElementById('profileInitial').style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
         });
-        
-        // Transcript Upload
-        document.getElementById('uploadTranscriptBtn').addEventListener('click', function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.pdf';
-            input.onchange = async function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    try {
-                        const formData = new FormData();
-                        formData.append('transcript', file);
-                        
-                        const response = await fetch('/api/upload-transcript', {
-                            method: 'POST',
-                            body: formData
-                        });
-        
-                        const data = await response.json();
-                        if (data.success) {
-                            populateProfileData(data.profile);
-                            showSuccessMessage('Transcript uploaded and processed successfully!');
-                        }
-                    } catch (error) {
-                        showErrorMessage('Failed to upload transcript. Please try again.');
-                    }
-                }
-            };
-            input.click();
-        });
-        
-        // Add Course
-        function addCourse() {
-            const coursesList = document.getElementById('coursesList');
-            const newCourse = document.createElement('div');
-            newCourse.className = 'course-entry';
-            newCourse.innerHTML = `
-                <input type="text" placeholder="Course Code (e.g., CIS 115)" required>
-                <input type="text" placeholder="Course Name" required>
-                <button class="remove-button" onclick="removeCourse(this)">×</button>
-            `;
-            coursesList.appendChild(newCourse);
-        }
-        
-        // Remove Course
-        function removeCourse(button) {
-            button.parentElement.remove();
-        }
-        
-        // Populate Profile Data
-        function populateProfileData(profile) {
-            // Personal Information
-            if (profile.firstName) document.getElementById('firstName').value = profile.firstName;
-            if (profile.lastName) document.getElementById('lastName').value = profile.lastName;
-            if (profile.phone) document.getElementById('phone').value = profile.phone;
-            if (profile.emplid) document.getElementById('emplid').value = profile.emplid;
-            if (profile.expectedGraduation) document.getElementById('expectedGraduation').value = profile.expectedGraduation;
-        
-            // Academic Information
-            if (profile.major) document.getElementById('major').value = profile.major;
-            if (profile.gpa) document.getElementById('gpa').value = profile.gpa;
-            
-            // Courses
-            if (profile.courses && profile.courses.length > 0) {
-                const coursesList = document.getElementById('coursesList');
-                coursesList.innerHTML = ''; // Clear existing courses
-                profile.courses.forEach(course => {
-                    const courseEntry = document.createElement('div');
-                    courseEntry.className = 'course-entry';
-                    courseEntry.innerHTML = `
-                        <input type="text" value="${course.courseId}" required>
-                        <input type="text" value="${course.courseName}" required>
-                        <button class="remove-button" onclick="removeCourse(this)">×</button>
-                    `;
-                    coursesList.appendChild(courseEntry);
+
+        // Handle transcript upload
+        // Updated transcript upload handler
+        document.getElementById('transcript').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('transcript', file);
+            formData.append('emplId', document.getElementById('emplId').value);
+
+            showStatus('Analyzing transcript...', 'info');
+
+            try {
+                const response = await fetch('/api/upload-transcript', {
+                    method: 'POST',
+                    body: formData
                 });
-            }
-        
-            // Skills
-            if (profile.skills && profile.skills.length > 0) {
-                skillsContainer.innerHTML = ''; // Clear existing skills
-                skills.clear();
-                profile.skills.forEach(skill => addSkill(skill));
-            }
-        
-            // Work Experience
-            if (profile.experience) document.getElementById('experience').value = profile.experience;
-        
-            // Preferences
-            if (profile.preferences) {
-                if (profile.preferences.department) {
-                    document.getElementById('preferredDepartment').value = profile.preferences.department;
+
+                const data = await response.json();
+                console.log('Transcript analysis response:', data);
+
+                if (data.success) {
+                    showStatus('Transcript analyzed successfully!', 'success');
+                    // Update profile with analyzed data
+                    populateProfile(data.user);
+                    
+                    // Log the courses to verify they're being received
+                    console.log('Received courses:', data.user.profile.courses);
+                } else {
+                    showStatus(data.message || 'Error processing transcript', 'error');
                 }
-                if (profile.preferences.workType) {
-                    document.getElementById('workType').value = profile.preferences.workType;
-                }
+            } catch (error) {
+                showStatus('Error uploading transcript', 'error');
+                console.error('Upload error:', error);
             }
-        }
-        
-        // Save Profile
-        async function saveProfile() {
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
-                showErrorMessage('User not authenticated');
+        });
+
+        // Separate function for populating courses
+        function populateCourses(courses) {
+            const coursesGrid = document.getElementById('coursesGrid');
+            if (!coursesGrid) {
+                console.error('Courses grid element not found!');
                 return;
             }
-        
-            // Gather all form data
-            const profileData = {
-                personal: {
-                    firstName: document.getElementById('firstName').value,
-                    lastName: document.getElementById('lastName').value,
-                    phone: document.getElementById('phone').value,
-                    emplid: document.getElementById('emplid').value,
-                    expectedGraduation: document.getElementById('expectedGraduation').value
-                },
-                academic: {
-                    major: document.getElementById('major').value,
-                    gpa: document.getElementById('gpa').value,
-                    courses: Array.from(document.getElementById('coursesList').children).map(course => ({
-                        courseId: course.children[0].value,
-                        courseName: course.children[1].value
-                    }))
-                },
-                skills: Array.from(skills),
-                experience: document.getElementById('experience').value,
-                preferences: {
-                    department: document.getElementById('preferredDepartment').value,
-                    workType: document.getElementById('workType').value,
-                    availability: getAvailability()
+
+            coursesGrid.innerHTML = ''; // Clear existing courses
+            console.log('Populating courses:', courses); // Debug log
+
+            if (courses && courses.length > 0) {
+                courses.forEach(course => {
+                    const courseCard = document.createElement('div');
+                    courseCard.className = 'course-card';
+                    
+                    // Add a data attribute for debugging
+                    courseCard.dataset.courseId = course.courseId;
+                    
+                    courseCard.innerHTML = `
+                        <div class="course-header">
+                            <span class="course-id">${course.courseId}</span>
+                            <span class="course-grade ${getGradeClass(course.grade)}">${course.grade}</span>
+                        </div>
+                        <div class="course-name">${course.courseName}</div>
+                        <div class="course-credits">${course.credits} Credits</div>
+                    `;
+                    coursesGrid.appendChild(courseCard);
+                });
+            } else {
+                coursesGrid.innerHTML = '<p>No courses found</p>';
+            }
+        }
+
+
+        // Skills handling
+        const skillInput = document.getElementById('skillInput');
+        const skillsContainer = document.getElementById('skillsContainer');
+        let skills = new Set();
+
+        skillInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const skill = this.value.trim();
+                if (skill) {
+                    addSkill(skill);
+                    this.value = '';
                 }
+            }
+        });
+
+        function addSkill(skill) {
+            if (!skills.has(skill)) {
+                skills.add(skill);
+                const skillTag = document.createElement('div');
+                skillTag.className = 'skill-tag';
+                skillTag.innerHTML = `
+                    ${skill}
+                    <button onclick="removeSkill(this, '${skill}')">&times;</button>
+                `;
+                skillsContainer.appendChild(skillTag);
+            }
+        }
+
+        function removeSkill(button, skill) {
+            skills.delete(skill);
+            button.parentElement.remove();
+        }
+
+        // Form submission
+        async function handleProfileSubmit(event) {
+            event.preventDefault();
+
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                showStatus('User not authenticated', 'error');
+                return;
+            }
+
+            const profileData = {
+                emplId: document.getElementById('emplId').value,
+                major: document.getElementById('major').value,
+                gpa: parseFloat(document.getElementById('gpa').value),
+                expectedGraduation: document.getElementById('expectedGraduation').value,
+                skills: Array.from(skills),
+                experience: document.getElementById('experience').value
             };
-        
+
             try {
                 const response = await fetch(`/api/profile/${userId}`, {
                     method: 'PUT',
@@ -677,88 +667,144 @@
                     },
                     body: JSON.stringify(profileData)
                 });
-        
+
                 const data = await response.json();
+
                 if (data.success) {
-                    showSuccessMessage('Profile updated successfully!');
+                    showStatus('Profile updated successfully!', 'success');
                 } else {
-                    showErrorMessage(data.message || 'Failed to update profile');
+                    showStatus(data.message || 'Error updating profile', 'error');
                 }
             } catch (error) {
-                showErrorMessage('An error occurred while saving the profile');
+                console.error('Profile update error:', error);
+                showStatus('Error updating profile', 'error');
             }
         }
-        
-        // Get Availability
-        function getAvailability() {
-            const availability = {};
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-            const timeSlots = ['Morning', 'Afternoon', 'Evening'];
-            
-            days.forEach(day => {
-                availability[day] = timeSlots.filter(slot => {
-                    const element = document.querySelector(`[data-day="${day}"][data-slot="${slot}"]`);
-                    return element && element.classList.contains('selected');
-                });
-            });
-            
-            return availability;
-        }
-        
-        // Message Handling
-        function showSuccessMessage(message) {
-            const messageElement = document.getElementById('successMessage');
-            messageElement.textContent = message;
-            messageElement.style.display = 'block';
-            messageElement.style.backgroundColor = 'var(--success-color)';
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 3000);
-        }
-        
-        function showErrorMessage(message) {
-            const messageElement = document.getElementById('successMessage');
-            messageElement.textContent = message;
-            messageElement.style.display = 'block';
-            messageElement.style.backgroundColor = 'var(--error-color)';
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 3000);
-        }
-        
-        // Initialize Profile
-        async function initializeProfile() {
-            const userId = localStorage.getItem('userId');
-            try {
-                const response = await fetch(`/api/profile/${userId}`);
-                const profile = await response.json();
-                if (profile) {
-                    populateProfileData(profile);
+
+        // Populate profile with existing data
+        function populateProfile(userData) {
+            // Set basic info
+            document.getElementById('profileName').textContent = userData.name || 'User';
+            document.getElementById('profileEmail').textContent = userData.email || '';
+            document.getElementById('profileInitial').textContent = 
+                (userData.name || 'U').charAt(0).toUpperCase();
+
+            // Set form values
+            if (userData.profile) {
+                document.getElementById('emplId').value = userData.profile.emplId || '';
+                document.getElementById('major').value = userData.profile.major || '';
+                document.getElementById('gpa').value = userData.profile.gpa || '';
+                document.getElementById('expectedGraduation').value = 
+                    userData.profile.expectedGraduation || '';
+                document.getElementById('experience').value = 
+                    userData.profile.experience || '';
+
+                // Set skills
+                skillsContainer.innerHTML = '';
+                skills.clear();
+                if (userData.profile.skills) {
+                    userData.profile.skills.forEach(skill => addSkill(skill));
                 }
-            } catch (error) {
-                showErrorMessage('Failed to load profile data');
+
+                // Populate courses
+                populateCourses(userData.profile.courses);
             }
         }
-        
-        // Logout Function
+
+        // Grade class helper function
+        function getGradeClass(grade) {
+            if (!grade) return 'grade-other';
+            if (grade.startsWith('A')) return 'grade-a';
+            if (grade.startsWith('B')) return 'grade-b';
+            if (grade.startsWith('C')) return 'grade-c';
+            return 'grade-other';
+        }
+
+        // Show status messages
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('uploadStatus');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All unsaved changes will be lost.')) {
+                document.getElementById('profileForm').reset();
+                skillsContainer.innerHTML = '';
+                skills.clear();
+                showStatus('Form reset successfully', 'info');
+            }
+        }
+
+        // Handle logout
         function handleLogout() {
-            // Clear all stored user data
-            localStorage.removeItem('userId');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            sessionStorage.clear(); // Clear any session storage as well
-            
-            // Redirect to login page
+            localStorage.clear();
             window.location.href = 'index.html';
         }
-        
-        // Event Listeners
-        document.querySelector('.logout-button').addEventListener('click', handleLogout);
-        
-        // Prevent form submission on enter key
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.target.nodeName !== 'TEXTAREA') {
-                e.preventDefault();
+
+        // Add this to handle file drag and drop
+        const uploadContainer = document.querySelector('.upload-container');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            uploadContainer.classList.add('highlight');
+        }
+
+        function unhighlight(e) {
+            uploadContainer.classList.remove('highlight');
+        }
+
+        uploadContainer.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            
+            if (file && file.type === 'application/pdf') {
+                document.getElementById('transcript').files = dt.files;
+                document.getElementById('transcript').dispatchEvent(new Event('change'));
+            } else {
+                showStatus('Please upload a PDF file', 'error');
+            }
+        }
+
+        // Add responsive sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        // Add window resize handler for responsive design
+        window.addEventListener('resize', function() {
+            const sidebar = document.querySelector('.sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
             }
         });
-        </script>
+    </script>
+</body>
+</html>
