@@ -328,7 +328,41 @@
 
     <!-- Main Content Area -->
     <main class="main-content" id="mainContent">
-        <!-- Content will be loaded here -->
+        <div class="content-header">
+            <h1>Welcome to BMCC Jobs</h1>
+<!--            <p>Click the image below to start your onboarding process</p>-->
+        </div>
+        <div class="onboarding-link-container">
+            <a href="onboarding/hronboarding.html" class="onboarding-link">
+                <img src="./images/bmcchr.png" alt="BMCC Onboarding" class="onboarding-image">
+            </a>
+        </div>
+
+        <style>
+            .onboarding-link-container {
+                display: flex;
+                justify-content: center;
+                padding: 2rem;
+            }
+
+            .onboarding-link {
+                display: block;
+                text-decoration: none;
+            }
+
+            .onboarding-image {
+                width: 100%;
+                max-width: 800px;
+                height: auto;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .onboarding-image:hover {
+                transform: translateY(-5px);
+            }
+        </style>
     </main>
 
     <script>
@@ -432,6 +466,41 @@
                     <p>HR resources and information</p>
                 </div>
                 <!-- Add HR content -->
+<!--            <a type="button" class="btn btn-primary" href="hrresource.html">Department Contact</a>-->
+    <main class="main-content" id="mainContent">
+        <div class="onboarding-link-container">
+            <a href="onboarding/hrresource.html" class="onboarding-link">
+
+                <img src="./images/department.jpg" alt="BMCC Onboarding" class="onboarding-image">
+            </a>
+        </div>
+
+        <style>
+            .onboarding-link-container {
+                display: flex;
+                justify-content: center;
+                padding: 2rem;
+            }
+
+            .onboarding-link {
+                display: block;
+                text-decoration: none;
+            }
+
+            .onboarding-image {
+                width: 100%;
+                max-width: 800px;
+                height: auto;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .onboarding-image:hover {
+                transform: translateY(-5px);
+            }
+</main>
+
             `;
         }
 

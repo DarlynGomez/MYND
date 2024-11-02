@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College HR Onboarding Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+
+        .document-item:hover {
+            background-color: #f8fafc;
+            transition: background-color 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<nav class="bg-blue-600 text-white p-4 shadow-lg">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold">College HR Portal</h1>
+        <div class="flex gap-4">
+            <button id="studentViewBtn" class="px-4 py-2 rounded hover:bg-blue-700 transition">Student View</button>
+            <button id="adminViewBtn" class="px-4 py-2 rounded hover:bg-blue-700 transition">Admin View</button>
+        </div>
+    </div>
+</nav>
+
+<main class="container mx-auto p-4">
+    <section id="studentView" class="fade-in">
+        <!-- Progress Tracker -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4">Document Submission Progress</h2>
+            <div class="relative pt-1">
+                <div class="flex mb-2 items-center justify-between">
+                        <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
+                            Progress
+                        </span>
+                    <span class="text-xs font-semibold inline-block text-blue-600">0%</span>
+                </div>
+                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+                    <div class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Required Documents Section -->
+            <div class="mt-8 space-y-4">
+                <h3 class="text-lg font-semibold mb-4">Required Documents for International Students</h3>
+
+                <!-- Document Items -->
+                <div class="document-item flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="passport" class="w-4 h-4 text-blue-600">
+                        <div>
+                            <label for="passport" class="font-medium block">Passport Copies</label>
+                            <p class="text-sm text-gray-600">Including issuance and expiration dates</p>
+                        </div>
+                    </div>
+                    <button class="upload-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>
+                </div>
+
+                <div class="document-item flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="i94" class="w-4 h-4 text-blue-600">
+                        <div>
+                            <label for="i94" class="font-medium block">Electronic I-94</label>
+                            <p class="text-sm text-gray-600">Photocopy of your electronic I-94</p>
+                        </div>
+                    </div>
+                    <button class="upload-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>
+                </div>
+
+                <div class="document-item flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="i20" class="w-4 h-4 text-blue-600">
+                        <div>
+                            <label for="i20" class="font-medium block">I-20 Document</label>
+                            <p class="text-sm text-gray-600">Front and back page of BMCC's I-20</p>
+                        </div>
+                    </div>
+                    <button class="upload-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>
+                </div>
+
+                <div class="document-item flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="ssn" class="w-4 h-4 text-blue-600">
+                        <div>
+                            <label for="ssn" class="font-medium block">Social Security Card</label>
+                            <p class="text-sm text-gray-600">Valid for employment</p>
+                        </div>
+                    </div>
+                    <button class="upload-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>
+                </div>
+
+                <div class="document-item flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="supervisorForm" class="w-4 h-4 text-blue-600">
+                        <div>
+                            <label for="supervisorForm" class="font-medium block">Supervisor's Form</label>
+                            <p class="text-sm text-gray-600">Original "Supervisor's Employment Verification Form"</p>
+                        </div>
+                    </div>
+                    <button class="upload-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>
+                </div>
+
+                <div class="document-item flex items-center justify-between p-4 border rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="ssnLetter" class="w-4 h-4 text-blue-600">
+                        <div>
+                            <label for="ssnLetter" class="font-medium block">SSN Letter</label>
+                            <p class="text-sm text-gray-600">ISS Letter to Social Security Administration (if no SSN)</p>
+                        </div>
+                    </div>
+                    <button class="upload-btn px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>
+                </div>
+
+                <!-- Important Note -->
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-sm text-yellow-800">
+                        <strong>Important Note:</strong> If you do not have a social security number, please allow 2-3 weeks for processing.
+                        Our office will prepare an employment verification letter only after the SS# has been issued.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"><a href="hronboarding.html">Back</a></button>
+    </section>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadButtons = document.querySelectorAll('.upload-btn');
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const progressBar = document.querySelector('.progress-bar');
+        const progressText = document.querySelector('.text-blue-600');
+
+        // Handle document uploads
+        uploadButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.pdf,.doc,.docx';
+
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const checkbox = this.closest('.document-item').querySelector('input[type="checkbox"]');
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            updateProgress();
+                        }
+                    }
+                });
+
+                fileInput.click();
+            });
+        });
+
+        // Update progress when checkboxes change
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+
+        // Calculate and update progress
+        function updateProgress() {
+            const total = checkboxes.length;
+            const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const percentage = (completed / total) * 100;
+
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = Math.round(percentage) + '%';
+        }
+    });
+</script>
+</body>
+</html>
