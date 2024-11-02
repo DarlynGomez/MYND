@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMCC HR Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #003d82;
+            --secondary-color: #0056b3;
+            --accent-color: #ffd700;
+            --background-color: #f5f7fa;
+            --text-color: #333;
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #eaeaea;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2rem;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header p-6 border-b border-gray-200">
+            <div class="logo-container flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-800 rounded-lg"></div>
+                <span class="text-lg font-bold text-blue-800">HR Admin</span>
+            </div>
+        </div>
+
+        <nav class="p-6 flex-grow">
+            <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-100 text-blue-800 mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span>Student Search</span>
+            </a>
+        </nav>
+
+        <div class="user-profile p-6 border-t border-gray-200">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-800" id="adminInitial">
+                    A
+                </div>
+                <div>
+                    <div class="font-medium" id="adminName">Admin User</div>
+                    <div class="text-sm text-gray-600">HR Administrator</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search Section -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">Student Search</h1>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex space-x-4">
+                    <input type="text" 
+                           id="emplIdSearch" 
+                           placeholder="Enter Student EMPLID (8 digits)" 
+                           pattern="\d{8}"
+                           class="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    <button onclick="searchStudent()" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Search
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Information Section -->
+        <div id="studentInfo" class="hidden fade-in">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Student Information</h2>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Name</p>
+                        <p id="studentName" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">EMPLID</p>
+                        <p id="studentEmplId" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Email</p>
+                        <p id="studentEmail" class="font-medium">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Onboarding Status</p>
+                        <select id="onboardingStatus" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="updateOnboardingStatus()">
+                            <option value="not-started">Not Started</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="onboarded">Onboarded</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <p class="text-sm text-blue-600 font-medium">Documents Pending</p>
+                        <p id="pendingCount" class="text-2xl font-bold text-blue-800">0</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <p class="text-sm text-yellow-600 font-medium">In Processing</p>
+                        <p id="processingCount" class="text-2xl font-bold text-yellow-800">0</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-sm text-green-600 font-medium">Documents Completed</p>
+                        <p id="completedCount" class="text-2xl font-bold text-green-800">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Required Documents</h2>
+                <div class="space-y-4" id="documentsContainer">
+                    <!-- Documents will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentStudentData = null;
+    
+        // Check if user is admin on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const userRole = localStorage.getItem('userRole');
+            const adminToken = localStorage.getItem('adminToken');
+            
+            if (userRole !== 'Admin' || !adminToken) {
+                console.log('No admin privileges detected, redirecting...');
+                window.location.href = 'index.html';
+                return;
+            }
+    
+            // Update admin profile
+            const adminName = localStorage.getItem('userName') || 'Admin User';
+            document.getElementById('adminName').textContent = adminName;
+            document.getElementById('adminInitial').textContent = adminName.charAt(0);
+        });
+    
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'pending':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'processing':
+                    return 'bg-blue-100 text-blue-800';
+                case 'approved':
+                    return 'bg-green-100 text-green-800';
+                case 'rejected':
+                    return 'bg-red-100 text-red-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+    
+        function getAdminHeaders() {
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                console.log('No admin token found');
+                window.location.href = 'index.html';
+                return {};
+            }
+            return {
+                'Content-Type': 'application/json',
+                'admin-token': adminToken
+            };
+        }
+    
+        async function searchStudent() {
+            const emplId = document.getElementById('emplIdSearch').value;
+            if (!/^\d{8}$/.test(emplId)) {
+                alert('Please enter a valid 8-digit EMPLID');
+                return;
+            }
+    
+            try {
+                const headers = getAdminHeaders();
+                if (!headers['admin-token']) {
+                    return; // getAdminHeaders will handle the redirect
+                }
+    
+                const response = await fetch(`/api/admin/user/${emplId}`, {
+                    headers: headers
+                });
+    
+                if (response.status === 401) {
+                    alert('Your admin session has expired. Please log in again.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+    
+                const data = await response.json();
+    
+                if (data.success) {
+                    currentStudentData = data.user;
+                    displayStudentInfo(data.user);
+                    document.getElementById('studentInfo').classList.remove('hidden');
+                } else {
+                    alert(data.message || 'Student not found');
+                }
+            } catch (error) {
+                console.error('Error searching student:', error);
+                alert('Error searching for student');
+            }
+        }
+    
+        function displayStudentInfo(student) {
+            // Basic Information
+            document.getElementById('studentName').textContent = student.name;
+            document.getElementById('studentEmplId').textContent = student.profile.emplId;
+            document.getElementById('studentEmail').textContent = student.email;
+            
+            // Onboarding Status
+            const onboardingSelect = document.getElementById('onboardingStatus');
+            onboardingSelect.value = student.profile.onboardingStatus || 'not-started';
+    
+            // Document Counts
+            const counts = student.profile.documentCounts || { 
+                pending: 0, 
+                processing: 0, 
+                completed: 0 
+            };
+            document.getElementById('pendingCount').textContent = counts.pending;
+            document.getElementById('processingCount').textContent = counts.processing;
+            document.getElementById('completedCount').textContent = counts.completed;
+    
+            // Display Documents
+            const documents = student.profile.documents || [];
+            displayDocuments(documents);
+        }
+    
+        function displayDocuments(documents) {
+            const container = document.getElementById('documentsContainer');
+            
+            if (documents.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 bg-gray-50 rounded-lg text-center">
+                        <p class="text-gray-600">No documents available</p>
+                    </div>
+                `;
+                return;
+            }
+    
+            container.innerHTML = documents.map(doc => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-medium">${doc.name}</h3>
+                            <span class="px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(doc.status)}">
+                                ${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600">
+                            ${doc.required ? 'Required' : 'Optional'} • 
+                            ${doc.submitInPerson ? 'In-Person Submission' : 'Online Submission'} •
+                            ${doc.submittedDate ? 'Submitted: ' + new Date(doc.submittedDate).toLocaleDateString() : 'Not submitted'}
+                        </p>
+                    </div>
+                    <select 
+                        class="ml-4 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        onchange="updateDocumentStatus('${doc.id}', this.value)"
+                        value="${doc.status}">
+                        <option value="pending" ${doc.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="processing" ${doc.status === 'processing' ? 'selected' : ''}>Processing</option>
+                        <option value="approved" ${doc.status === 'approved' ? 'selected' : ''}>Approved</option>
+                        <option value="rejected" ${doc.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                    </select>
+                </div>
+            `).join('');
+        }
+    
+        async function updateDocumentStatus(docId, status) {
+            const emplId = document.getElementById('studentEmplId').textContent;
+            
+            try {
+                const response = await fetch('/api/admin/document-status', {
+                    method: 'PUT',
+                    headers: getAdminHeaders(),
+                    body: JSON.stringify({
+                        emplId,
+                        documentId: docId,
+                        status
+                    })
+                });
+    
+                const data = await response.json();
+                if (data.success) {
+                    // Update the UI with new data
+                    currentStudentData.profile = data.profile;
+                    displayStudentInfo(currentStudentData);
+                } else {
+                    alert(data.message || 'Error updating document status');
+                }
+            } catch (error) {
+                console.error('Error updating document status:', error);
+                alert('Error updating document status');
+            }
+        }
+    
+        async function updateOnboardingStatus() {
+            const emplId = document.getElementById('studentEmplId').textContent;
+            const status = document.getElementById('onboardingStatus').value;
+    
+            try {
+                const response = await fetch('/api/admin/onboarding-status', {
+                    method: 'PUT',
+                    headers: getAdminHeaders(),
+                    body: JSON.stringify({
+                        emplId,
+                        status
+                    })
+                });
+    
+                const data = await response.json();
+                if (data.success) {
+                    // Update the UI with new data
+                    currentStudentData.profile = data.profile;
+                    displayStudentInfo(currentStudentData);
+                    
+                    // Show success feedback
+                    const select = document.getElementById('onboardingStatus');
+                    const originalBg = select.style.backgroundColor;
+                    select.style.backgroundColor = '#f0fff4';
+                    setTimeout(() => {
+                        select.style.backgroundColor = originalBg;
+                    }, 1000);
+                } else {
+                    alert(data.message || 'Error updating onboarding status');
+                }
+            } catch (error) {
+                console.error('Error updating onboarding status:', error);
+                alert('Error updating onboarding status');
+            }
+        }
+    
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+    
+        // Add event listener for the Enter key in the search input
+        document.getElementById('emplIdSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchStudent();
+            }
+        });
+    </script>
+</body>
+</html>

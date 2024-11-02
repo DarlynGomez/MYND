@@ -152,12 +152,17 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Store user data in localStorage
+                    // Store all necessary data in localStorage
                     localStorage.setItem('userId', data.user.id);
                     localStorage.setItem('userEmail', data.user.email);
                     localStorage.setItem('userName', data.user.name);
                     localStorage.setItem('userRole', data.user.role);
-                    localStorage.setItem('emplId', data.user.profile.emplId);
+                    
+                    // Store admin token if present
+                    if (data.adminToken) {
+                        localStorage.setItem('adminToken', data.adminToken);
+                        console.log('Admin token stored:', data.adminToken); // Debug log
+                    }
                     
                     // Redirect to appropriate page
                     window.location.href = data.redirectTo;
@@ -171,7 +176,6 @@
                 messageEl.className = 'error';
             }
         }
-
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('registerName').value;

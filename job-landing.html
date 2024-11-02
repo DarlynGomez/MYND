@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BMCC Campus Jobs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --primary-color: #003d82;
@@ -257,7 +258,140 @@
                 justify-content: center;
             }
         }
+        .fade-in {
+        animation: fadeIn 0.3s ease-in;
+        opacity: 1;
+    }
+
+    .fade-out {
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* HR Onboarding specific styles */
+    .progress-container {
+        background-color: #EDF2F7;
+        border-radius: 9999px;
+        height: 0.5rem;
+        overflow: hidden;
+    }
+
+    /* Status colors */
+    .status-completed {
+        background-color: #48BB78;
+        color: white;
+    }
+
+    .status-pending {
+        background-color: #ECC94B;
+        color: #744210;
+    }
+
+    .status-inprogress {
+        background-color: #4299E1;
+        color: white;
+    }
+
+    /* Document section styles */
+    .document-section {
+        border-left-width: 4px;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .document-section.required {
+        border-color: #F56565;
+    }
+
+    .document-section.optional {
+        border-color: #4A5568;
+    }
+
+    /* Student onboarding specific styles */
+    .hold-item {
+        border-left-width: 4px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
+
+    .hold-item:hover {
+        background-color: #F7FAFC;
+    }
+
+    .hold-item.urgent {
+        border-color: #F56565;
+    }
+
+    .hold-item.warning {
+        border-color: #ECC94B;
+    }
+
+    /* Status indicators */
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .status-badge.completed {
+        background-color: #C6F6D5;
+        color: #22543D;
+    }
+
+    .status-badge.pending {
+        background-color: #FEEBC8;
+        color: #744210;
+    }
+
+    .status-badge.inreview {
+        background-color: #BEE3F8;
+        color: #2A4365;
+    }
+
+    /* Grid layouts */
+    .grid-cols-1 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    @media (min-width: 768px) {
+        .md\:grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .md\:grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    /* Animation classes */
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+    }
+
+    .hover\:shadow-lg:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+        
     </style>
+    <script type="module">
+        import ContentHandler from './content-handler.js';
+        window.contentHandler = new ContentHandler();
+    </script>
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -285,11 +419,11 @@
                 </svg>
                 <span>Campus Jobs</span>
             </a>
-            <a href="#" class="nav-item" onclick="loadContent('hr')">
+            <a href="#" class="nav-item" onclick="contentHandler.loadContent('hr')">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                <span>HR</span>
+                HR
             </a>
         </nav>
 
@@ -327,7 +461,7 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="main-content" id="mainContent">
+    <main id="mainContent" class="main-content transition-all duration-300 p-6 bg-gray-50 min-h-screen" role="main">
         <!-- Content will be loaded here -->
     </main>
 
