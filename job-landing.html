@@ -31,17 +31,17 @@
 
         /* Sidebar Styles */
         .sidebar {
-        width: var(--sidebar-width);
-        background-color: white;
-        border-right: 1px solid #eaeaea;
-        height: 100vh;
-        position: fixed;
-        left: 0;
-        top: 0;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-    }
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #eaeaea;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        }
 
         .sidebar-header {
             padding: 1.5rem;
@@ -147,6 +147,77 @@
             overflow-y: auto;
         }
 
+        .user-profile {
+            position: relative;
+            padding: 1.5rem;
+            border-top: 1px solid #eaeaea;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background-color: var(--background-color);
+        }
+
+        .profile-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #eaeaea;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+            display: none;
+            z-index: 1000;
+        }
+
+        .profile-menu.active {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background-color: var(--background-color);
+        }
+
+        .menu-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .profile-menu {
+                left: 60px; /* Sidebar collapsed width */
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                border: 1px solid #eaeaea;
+                min-width: 200px;
+            }
+        }
+
         .content-header {
             margin-bottom: 2rem;
         }
@@ -186,146 +257,6 @@
                 justify-content: center;
             }
         }
-        .user-profile {
-            padding: 1.5rem;
-            border-top: 1px solid #eaeaea;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            position: relative;
-        }
-
-        .profile-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
-        }
-
-        .profile-container:hover {
-            background-color: var(--background-color);
-        }
-
-        .profile-pic {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary-color);
-            position: relative;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #ff4444;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: bold;
-            border: 2px solid white;
-        }
-
-        .profile-dropdown {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            right: 0;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem;
-            margin: 0.5rem;
-            display: none;
-        }
-
-        .profile-dropdown.show {
-            display: block;
-        }
-
-        .notification-item {
-            padding: 0.75rem;
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-            background-color: var(--background-color);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .notification-item:hover {
-            background-color: #e8e8e8;
-        }
-
-        .notification-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .notification-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-color);
-            margin-bottom: 0.25rem;
-        }
-
-        .notification-time {
-            font-size: 0.75rem;
-            color: #666;
-        }
-
-        .profile-actions {
-            padding: 0.5rem;
-            border-top: 1px solid #eaeaea;
-            margin-top: 0.5rem;
-        }
-
-        .profile-action-btn {
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            background: none;
-            text-align: left;
-            cursor: pointer;
-            border-radius: 6px;
-            color: var(--text-color);
-            transition: background-color 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .profile-action-btn:hover {
-            background-color: var(--background-color);
-        }
-
-        /* Update the existing user-profile class in your sidebar */
-        .sidebar .user-profile {
-            margin-top: auto; /* Push to bottom */
-        }
-
-        @media (max-width: 768px) {
-            .profile-info {
-                display: none;
-            }
-            
-            .notification-badge {
-                width: 16px;
-                height: 16px;
-                font-size: 0.7rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -362,50 +293,38 @@
             </a>
         </nav>
 
-        <div class="user-profile">
-            <div class="profile-container" onclick="toggleProfileDropdown()">
-                <div class="profile-pic">
-                    J
-                    <div class="notification-badge">3</div>
-                </div>
+        <div class="user-profile" onclick="toggleProfileMenu(event)">
+            <div class="profile-content">
+                <div class="profile-pic">J</div>
                 <div class="profile-info">
                     <div class="profile-name">John Doe</div>
                     <div class="profile-role">Student</div>
                 </div>
             </div>
-    
-            <div class="profile-dropdown" id="profileDropdown">
-                <div class="notification-item">
-                    <div class="notification-title">New job posting in IT Department</div>
-                    <div class="notification-time">2 hours ago</div>
-                </div>
-                <div class="notification-item">
-                    <div class="notification-title">Application status updated</div>
-                    <div class="notification-time">5 hours ago</div>
-                </div>
-                <div class="notification-item">
-                    <div class="notification-title">Profile completion reminder</div>
-                    <div class="notification-time">1 day ago</div>
-                </div>
-                <div class="profile-actions">
-                    <button class="profile-action-btn" onclick="location.href='profile.html'">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        View Profile
-                    </button>
-                    <button class="profile-action-btn" onclick="handleLogout()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Logout
-                    </button>
-                </div>
-            </div>
+        <!--Profile menu --> 
+        <div class="profile-menu" id="profileMenu">
+            <a href="profile.html" class="menu-item">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                View Profile
+            </a>
+            <a href="profile.html#settings" class="menu-item">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Settings
+            </a>
+            <a href="#" class="menu-item logout" onclick="handleLogout(event)">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                Logout
+            </a>
         </div>
+    </div>
+    </aside>
 
     <!-- Main Content Area -->
     <main class="main-content" id="mainContent">
@@ -413,22 +332,43 @@
     </main>
 
     <script>
-
-        function toggleProfileDropdown() {
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.classList.toggle('show');
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function closeDropdown(e) {
-                const profile = document.querySelector('.profile-container');
-                const dropdown = document.getElementById('profileDropdown');
-                
-                if (!profile.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                    document.removeEventListener('click', closeDropdown);
-                }
-            });
+        function toggleProfileMenu(event) {
+            event.stopPropagation(); // Prevent event bubbling
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('active');
         }
+
+        function handleLogout(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Clear all stored user data
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Redirect to login page
+            window.location.href = 'index.html';
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('profileMenu');
+            const profile = document.querySelector('.user-profile');
+            
+            if (!profile.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Update profile info when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const userName = localStorage.getItem('userName') || 'User';
+            const userRole = localStorage.getItem('userRole') || 'Student';
+            
+            document.querySelector('.profile-pic').textContent = userName.charAt(0);
+            document.querySelector('.profile-name').textContent = userName;
+            document.querySelector('.profile-role').textContent = userRole;
+        });
         // Get user info from localStorage
         const userId = localStorage.getItem('userId');
         const userName = localStorage.getItem('userName') || 'User';
@@ -485,68 +425,6 @@
             `;
         }
 
-        // Update notification count
-        function updateNotificationCount(count) {
-            const badge = document.querySelector('.notification-badge');
-            if (count > 0) {
-                badge.style.display = 'flex';
-                badge.textContent = count > 99 ? '99+' : count;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        // Sample notification data
-        let notifications = [
-            {
-                id: 1,
-                title: 'New job posting in IT Department',
-                time: '2 hours ago',
-                read: false
-            },
-            {
-                id: 2,
-                title: 'Application status updated',
-                time: '5 hours ago',
-                read: false
-            },
-            {
-                id: 3,
-                title: 'Profile completion reminder',
-                time: '1 day ago',
-                read: false
-            }
-        ];
-
-        // Update notification display
-        function updateNotifications() {
-            const unreadCount = notifications.filter(n => !n.read).length;
-            updateNotificationCount(unreadCount);
-
-            const dropdown = document.getElementById('profileDropdown');
-            const notificationsHtml = notifications.map(notification => `
-                <div class="notification-item" onclick="markAsRead(${notification.id})">
-                    <div class="notification-title">${notification.title}</div>
-                    <div class="notification-time">${notification.time}</div>
-                </div>
-            `).join('');
-
-            // Insert notifications before profile actions
-            const actionsDiv = dropdown.querySelector('.profile-actions');
-            const notificationsContainer = dropdown.querySelector('.notifications-container') || document.createElement('div');
-            notificationsContainer.className = 'notifications-container';
-            notificationsContainer.innerHTML = notificationsHtml;
-            dropdown.insertBefore(notificationsContainer, actionsDiv);
-        }
-
-        function markAsRead(notificationId) {
-            const notification = notifications.find(n => n.id === notificationId);
-            if (notification) {
-                notification.read = true;
-                updateNotifications();
-            }
-        }
-
         async function loadHRContent() {
             return `
                 <div class="content-header">
@@ -561,8 +439,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadContent('campus-jobs');
         });
-        // Initialize notifications on page load
-        document.addEventListener('DOMContentLoaded', updateNotifications);
 
         // Handle logout
         function handleLogout() {
