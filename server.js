@@ -1,3 +1,22 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static(__dirname));
+
+// Create uploads directory if it doesn't exist
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir);
+}
+
+// Debug helper
 const debugUsers = () => {
     console.log('Current users in system:', users.map(u => ({
         id: u.id,
@@ -6,18 +25,26 @@ const debugUsers = () => {
     })));
 };
 
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const multer = require('multer');
-const app = express();
+// Initialize Map for admin tokens
+const activeAdminTokens = new Map();
 
-// Interactivity of Server
+// Define adminAuthMiddleware before using it
+const adminAuthMiddleware = (req, res, next) => {
+    const adminToken = req.headers['admin-token'];
+    console.log('Received admin token:', adminToken);
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(__dirname));
+    if (!adminToken || !activeAdminTokens.has(adminToken)) {
+        console.log('Invalid or missing admin token');
+        return res.status(401).json({ 
+            success: false, 
+            message: 'Unauthorized access' 
+        });
+    }
+    
+    // Add the admin user ID to the request
+    req.adminUserId = activeAdminTokens.get(adminToken);
+    next();
+};
 
 // Initialize users array with default admin
 const users = [{
@@ -86,34 +113,187 @@ const documentsTemplate = [
     }
 ];
 
-// Configure multer for file upload
-const storage = multer.memoryStorage();
-const upload = multer({ 
-    storage: storage,
-    fileFilter: function (req, file, cb) {
-        if (file.mimetype !== 'application/pdf') {
-            return cb(new Error('Only PDF files are allowed'));
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const userDir = path.join(uploadDir, req.body.emplId);
+        if (!fs.existsSync(userDir)){
+            fs.mkdirSync(userDir);
         }
-        cb(null, true);
+        cb(null, userDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, `${req.body.documentId}-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
 });
 
-const adminAuthMiddleware = (req, res, next) => {
-    const adminToken = req.headers['admin-token'];
-    console.log('Received admin token:', adminToken); // Debug log
+const upload = multer({ 
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedTypes.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only PDF, DOC, DOCX, and image files are allowed.'));
+        }
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
+});
 
-    if (!adminToken || !activeAdminTokens.has(adminToken)) {
-        console.log('Invalid or missing admin token'); // Debug log
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Unauthorized access' 
+// Document upload endpoint
+app.post('/api/upload-document', upload.single('file'), (req, res) => {
+    try {
+        const { emplId, documentId } = req.body;
+        console.log(`Processing document upload for EMPLID ${emplId}, document ${documentId}`);
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file uploaded'
+            });
+        }
+
+        // Find user and update document status
+        const userIndex = users.findIndex(u => 
+            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+        );
+
+        if (userIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Find the document and update its status
+        const docIndex = users[userIndex].profile.documents.findIndex(
+            doc => doc.id === documentId
+        );
+
+        if (docIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'Document not found'
+            });
+        }
+
+        // Update document status and add file information
+        users[userIndex].profile.documents[docIndex] = {
+            ...users[userIndex].profile.documents[docIndex],
+            status: 'processing',
+            fileInfo: {
+                path: req.file.path,
+                originalName: req.file.originalname,
+                uploadDate: new Date()
+            }
+        };
+
+        // Update document counts
+        const documents = users[userIndex].profile.documents;
+        users[userIndex].profile.documentCounts = {
+            completed: documents.filter(d => d.status === 'approved').length,
+            pending: documents.filter(d => d.status === 'pending').length,
+            processing: documents.filter(d => d.status === 'processing').length
+        };
+
+        console.log('Document uploaded successfully:', {
+            emplId,
+            documentId,
+            status: 'processing',
+            file: req.file.filename
+        });
+
+        res.json({
+            success: true,
+            message: 'Document uploaded successfully',
+            profile: users[userIndex].profile
+        });
+
+    } catch (error) {
+        console.error('Error uploading document:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
         });
     }
-    
-    // Add the admin user ID to the request
-    req.adminUserId = activeAdminTokens.get(adminToken);
-    next();
-};
+});
+
+// Serve uploaded files (with basic security check)
+app.get('/uploads/:emplId/:file', adminAuthMiddleware, (req, res) => {
+    const filePath = path.join(uploadDir, req.params.emplId, req.params.file);
+    res.sendFile(filePath);
+});
+
+// Admin document review endpoint
+app.put('/api/admin/document-status', adminAuthMiddleware, (req, res) => {
+    try {
+        const { emplId, documentId, status, feedback } = req.body;
+        console.log(`Updating document status: EMPLID ${emplId}, document ${documentId}, status ${status}`);
+
+        const userIndex = users.findIndex(u => 
+            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+        );
+
+        if (userIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        const docIndex = users[userIndex].profile.documents.findIndex(
+            doc => doc.id === documentId
+        );
+
+        if (docIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'Document not found'
+            });
+        }
+
+        // Update document status
+        users[userIndex].profile.documents[docIndex] = {
+            ...users[userIndex].profile.documents[docIndex],
+            status,
+            feedback,
+            reviewDate: new Date()
+        };
+
+        // Update document counts
+        const documents = users[userIndex].profile.documents;
+        users[userIndex].profile.documentCounts = {
+            completed: documents.filter(d => d.status === 'approved').length,
+            pending: documents.filter(d => d.status === 'pending').length,
+            processing: documents.filter(d => d.status === 'processing').length
+        };
+
+        console.log('Document status updated:', {
+            emplId,
+            documentId,
+            status,
+            newCounts: users[userIndex].profile.documentCounts
+        });
+
+        res.json({
+            success: true,
+            message: 'Document status updated',
+            profile: users[userIndex].profile
+        });
+
+    } catch (error) {
+        console.error('Error updating document status:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 
 // Serve HTML files
 app.get('/', (req, res) => {
@@ -213,8 +393,6 @@ app.post('/api/login', (req, res) => {
 app.get('/hronboarding.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'hronboarding.html'));
 });
-
-const activeAdminTokens = new Map();
 
 // Registration endpoint
 app.post('/api/register', (req, res) => {

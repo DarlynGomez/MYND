@@ -140,6 +140,56 @@ function updateUI(data) {
     }
 }
 
+
+async function handleDocumentUpload(documentId) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+    
+    fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('emplId', localStorage.getItem('userId'));
+            formData.append('documentId', documentId);
+
+            // Show upload status
+            const statusEl = document.getElementById(`status-${documentId}`);
+            if (statusEl) {
+                statusEl.textContent = 'Uploading...';
+                statusEl.className = 'text-blue-600';
+            }
+
+            const response = await fetch('/api/upload-document', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log('Upload successful:', data);
+                // Refresh the document status display
+                fetchDocumentStatus();
+            } else {
+                console.error('Upload failed:', data.message);
+                if (statusEl) {
+                    statusEl.textContent = 'Upload failed: ' + data.message;
+                    statusEl.className = 'text-red-600';
+                }
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Error uploading document: ' + error.message);
+        }
+    };
+
+    fileInput.click();
+}
+
 function updateDocuments(documents) {
     const inPersonDocs = documents.filter(doc => doc.submitInPerson);
     const onlineDocs = documents.filter(doc => !doc.submitInPerson);
