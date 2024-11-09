@@ -1,4 +1,5 @@
 // content-handler.js
+// Dynanmically loads in content on the page like stuonboarding and jobs
 
 class ContentHandler {
     constructor() {

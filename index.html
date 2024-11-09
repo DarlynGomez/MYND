@@ -151,10 +151,9 @@
 
                 const data = await response.json();
 
-                // In the login success handler
                 if (data.success) {
-                    // Store all necessary data in localStorage
-                    localStorage.setItem('userId', data.user.profile.emplId); // Store EMPLID instead of internal ID
+                    // Store user information
+                    localStorage.setItem('userId', data.user.profile.emplId);
                     localStorage.setItem('userEmail', data.user.email);
                     localStorage.setItem('userName', data.user.name);
                     localStorage.setItem('userRole', data.user.role);
@@ -174,6 +173,7 @@
                 messageEl.className = 'error';
             }
         }
+        
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('registerName').value;

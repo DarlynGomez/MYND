@@ -1,16 +1,11 @@
 <!DOCTYPE html>
-
-<!-- HR Onboarding Portal Page -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>College HR Onboarding Portal</title>
-    <!-- Include Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Include Custom CSS -->
     <style>
-        /* Custom animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -20,7 +15,6 @@
             animation: fadeIn 0.5s ease-in;
         }
 
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -38,92 +32,108 @@
             background: #555;
         }
 
-        /* Progress bar animations */
         .progress-bar {
             transition: width 0.5s ease-in-out;
         }
     </style>
 </head>
 <body class="bg-gray-50">
-<!-- Navigation Bar -->
-<nav class="bg-blue-600 text-white p-4 shadow-lg">
-    <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-xl font-bold">Welcome Onboarding</h1>
-        <div class="flex gap-4">
-            <button id="studentViewBtn" class="px-4 py-2 rounded hover:bg-blue-700 transition">Student View</button>
-            <button id="adminViewBtn" class="px-4 py-2 rounded hover:bg-blue-700 transition">Admin View</button>
-        </div>
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="bg-gray-100 p-4 font-mono text-sm">
+        <div>EMPLID: <span id="debugUserId">Loading...</span></div>
+        <div>Status Data: <span id="debugStatus">Loading...</span></div>
+        <div>View State: <span id="debugView">Loading...</span></div>
     </div>
-</nav>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Welcome Onboarding</h1>
+        </div>
+    </nav>
 
 <!-- Main Content Area -->
 <main class="container mx-auto p-4">
-    <!-- Student View -->
-    <section id="studentView" class="fade-in">
+    <!-- Not Started View -->
+    <section id="notStartedView" class="hidden fade-in">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-bold mb-4">Onboarding Not Started</h2>
+                <div class="max-w-2xl mx-auto">
+                    <p class="text-gray-600 mb-6">
+                        To begin your onboarding process, please complete these steps:
+                    </p>
+                    <ol class="text-left text-gray-600 space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3">1</span>
+                            <div>
+                                <p class="font-medium">Find a Position</p>
+                                <p class="text-sm">Browse and apply for available campus positions</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3">2</span>
+                            <div>
+                                <p class="font-medium">Submit Your Application</p>
+                                <p class="text-sm">Complete and submit your job application</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3">3</span>
+                            <div>
+                                <p class="font-medium">Wait for Approval</p>
+                                <p class="text-sm">HR will review your application and start onboarding</p>
+                            </div>
+                        </li>
+                    </ol>
+                    <button onclick="window.location.href='job-landing.html'" 
+                            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        View Available Positions
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Onboarding Progress View -->
+    <section id="onboardingView" class="hidden fade-in">
         <!-- Progress Tracker -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-2xl font-bold mb-4">Your Onboarding Progress</h2>
             <div class="relative pt-1">
                 <div class="flex mb-2 items-center justify-between">
                     <div>
-                            <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
-                                Progress
-                            </span>
+                        <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
+                            Progress
+                        </span>
                     </div>
                     <div class="text-right">
-                            <span class="text-xs font-semibold inline-block text-blue-600">
-                                60%
-                            </span>
+                        <span id="progressPercentage" class="text-xs font-semibold inline-block text-blue-600">
+                            0%
+                        </span>
                     </div>
                 </div>
                 <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
-                    <div class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500" style="width: 60%"></div>
+                    <div id="progressBar" class="progress-bar shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500" style="width: 0%"></div>
                 </div>
             </div>
 
-            <!-- Steps List -->
-            <div class="space-y-4">
-                <div class="flex items-center p-4 bg-green-100 rounded-lg">
-                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white mr-3">✓</div>
-                    <div>
-                        <h3 class="font-semibold">Personal Information</h3>
-                        <p class="text-sm text-gray-600">Completed on Oct 15, 2024</p>
-                    </div>
-                </div>
-                <div class="flex items-center p-4 bg-yellow-100 rounded-lg">
-                    <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white mr-3">2</div>
-                    <div>
-                        <h3 class="font-semibold">Document Upload</h3>
-                        <p class="text-sm text-gray-600">In Progress - 2 documents pending</p>
-                    </div>
-                </div>
-                <!-- Add more steps -->
+            <div id="stepsList" class="space-y-4">
+                <!-- Steps will be populated dynamically -->
             </div>
         </div>
 
-        <!-- Document Checklist -->
+        <!-- Document Sections -->
         <div class="grid md:grid-cols-2 gap-6">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-4">Required Documents</h2>
-                <div class="space-y-4">
-                    <!-- Document Items -->
-<!--                    <div class="flex items-center justify-between p-3 border rounded-lg">-->
-<!--                        <span>I-9 Form</span>-->
-<!--                        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>-->
-<!--                    </div>-->
-                    <!-- Add more document items -->
-<!--                    <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Upload</button>-->
-                    <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"><a href="required-doc.html">Checklist to Followup</a></button>
-                    <div>
-
-
-
-
-
-
-                    </div>
-
+                <div id="documentsList" class="space-y-4">
+                    <!-- Documents will be populated dynamically -->
                 </div>
+                <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <a href="required-doc.html">Checklist to Followup</a>
+                </button>
             </div>
 
             <!-- FAQ Section -->
@@ -134,52 +144,9 @@
                         <summary class="font-semibold cursor-pointer">What documents do I need for the I-9 form?</summary>
                         <p class="mt-2 text-gray-600">You will need either one document from List A (e.g., passport) or one document each from List B (e.g., driver's license) and List C (e.g., social security card).</p>
                     </details>
-                    <!-- Add more FAQ items -->
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Admin View -->
-    <section id="adminView" class="hidden fade-in">
-        <!-- Dashboard Stats -->
-        <div class="grid md:grid-cols-4 gap-6 mb-6">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-gray-500 text-sm">Total Students</h3>
-                <p class="text-3xl font-bold">156</p>
-            </div>
-            <!-- Add more stat cards -->
-        </div>
-
-        <!-- Student List -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-4">Student Onboarding Status</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-6 py-3 text-left">Student Name</th>
-                        <th class="px-6 py-3 text-left">Status</th>
-                        <th class="px-6 py-3 text-left">Progress</th>
-                        <th class="px-6 py-3 text-left">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <!-- Sample row -->
-                    <tr class="border-b">
-                        <td class="px-6 py-4">John Doe</td>
-                        <td class="px-6 py-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">In Progress</span></td>
-                        <td class="px-6 py-4">60%</td>
-                        <td class="px-6 py-4">
-                            <button class="text-blue-600 hover:text-blue-800">View Details</button>
-                        </td>
-                    </tr>
-                    <!-- Add more rows -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </section>
 </main>
 
@@ -190,100 +157,139 @@
     </div>
 </footer>
 
-<!-- JavaScript -->
 <script>
-    // View switching functionality
-    const studentViewBtn = document.getElementById('studentViewBtn');
-    const adminViewBtn = document.getElementById('adminViewBtn');
-    const studentView = document.getElementById('studentView');
-    const adminView = document.getElementById('adminView');
-
-    studentViewBtn.addEventListener('click', () => {
-        studentView.classList.remove('hidden');
-        adminView.classList.add('hidden');
-        studentViewBtn.classList.add('bg-blue-700');
-        adminViewBtn.classList.remove('bg-blue-700');
-    });
-
-    adminViewBtn.addEventListener('click', () => {
-        adminView.classList.remove('hidden');
-        studentView.classList.add('hidden');
-        adminViewBtn.classList.add('bg-blue-700');
-        studentViewBtn.classList.remove('bg-blue-700');
-    });
-
-    // Sample data structure for backend integration
-    const onboardingData = {
-        students: [
-            {
-                id: 1,
-                name: 'John Doe',
-                progress: 60,
-                status: 'in_progress',
-                documents: [
-                    { name: 'I-9 Form', status: 'pending' },
-                    { name: 'W-4 Form', status: 'completed' }
-                ]
-            }
-            // Add more student data
-        ]
-    };
-
-    // Functions for backend integration
-    async function updateStudentProgress(studentId, progress) {
-        try {
-            // Example API call
-            // await fetch('/api/student/progress', {
-            //     method: 'POST',
-            //     body: JSON.stringify({ studentId, progress })
-            // });
-            console.log(`Updated progress for student ${studentId}: ${progress}%`);
-        } catch (error) {
-            console.error('Error updating progress:', error);
-        }
+document.addEventListener('DOMContentLoaded', async function() {
+    const userEmplId = localStorage.getItem('userId'); // This should be the EMPLID
+    console.log('Found EMPLID:', userEmplId);
+    
+    // Update debug panel with EMPLID
+    document.getElementById('debugUserId').textContent = userEmplId || 'Not found';
+    
+    if (!userEmplId) {
+        console.error('No EMPLID found in localStorage');
+        document.getElementById('debugStatus').textContent = 'Error: No EMPLID';
+        window.location.href = 'index.html';
+        return;
     }
 
-    // Document upload handler
-    async function handleDocumentUpload(studentId, documentType) {
-        try {
-            // Example file upload logic
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = '.pdf,.doc,.docx';
-            fileInput.click();
-
-            fileInput.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    // Example API call
-                    // const formData = new FormData();
-                    // formData.append('file', file);
-                    // await fetch('/api/documents/upload', {
-                    //     method: 'POST',
-                    //     body: formData
-                    // });
-                    console.log(`Uploaded ${file.name} for student ${studentId}`);
-                }
-            });
-        } catch (error) {
-            console.error('Error uploading document:', error);
+    try {
+        console.log('Fetching status for EMPLID:', userEmplId);
+        const response = await fetch(`/api/document-status/${userEmplId}`);
+        console.log('Response:', response);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }
+        
+        const data = await response.json();
+        console.log('Received data:', data);
+        
+        // Update debug panel
+        document.getElementById('debugStatus').textContent = JSON.stringify(data, null, 2);
+        
+        // Show/hide appropriate view
+        const notStartedView = document.getElementById('notStartedView');
+        const onboardingView = document.getElementById('onboardingView');
+        
+        console.log('Status:', data.onboardingStatus);
+        document.getElementById('debugView').textContent = data.onboardingStatus;
 
-    // Initialize tooltips and other UI enhancements
-    document.addEventListener('DOMContentLoaded', () => {
-        // Add smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
+        if (data.onboardingStatus === 'not-started') {
+            console.log('Showing not started view');
+            notStartedView.classList.remove('hidden');
+            onboardingView.classList.add('hidden');
+        } else {
+            console.log('Showing onboarding view');
+            notStartedView.classList.add('hidden');
+            onboardingView.classList.remove('hidden');
+            updateOnboardingProgress(data);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('debugStatus').textContent = `Error: ${error.message}`;
+    }
+});
+
+function updateOnboardingProgress(data) {
+    // Update progress bar
+    const totalDocs = data.documents.length;
+    const completedDocs = data.documentCounts.completed;
+    const progressPercentage = totalDocs > 0 ? Math.round((completedDocs / totalDocs) * 100) : 0;
+    
+    document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+    document.getElementById('progressPercentage').textContent = `${progressPercentage}%`;
+
+    // Update steps list
+    const stepsList = document.getElementById('stepsList');
+    stepsList.innerHTML = '';
+    if (data.documents) {
+        data.documents.forEach((doc, index) => {
+            stepsList.innerHTML += `
+                <div class="flex items-center p-4 ${doc.status === 'approved' ? 'bg-green-100' : 'bg-gray-100'} rounded-lg">
+                    <div class="w-8 h-8 ${doc.status === 'approved' ? 'bg-green-500' : 'bg-gray-500'} rounded-full flex items-center justify-center text-white mr-3">
+                        ${doc.status === 'approved' ? '✓' : index + 1}
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">${doc.name}</h3>
+                        <p class="text-sm text-gray-600">
+                            ${doc.status === 'approved' ? 
+                              'Completed' : 
+                              doc.status === 'processing' ? 
+                              'In Progress' : 
+                              'Pending'}
+                        </p>
+                    </div>
+                </div>`;
         });
-    });
+    }
+
+    // Update documents list
+    const documentsList = document.getElementById('documentsList');
+    documentsList.innerHTML = '';
+    if (data.documents) {
+        data.documents.forEach(doc => {
+            documentsList.innerHTML += `
+                <div class="flex items-center justify-between p-3 border rounded-lg">
+                    <span>${doc.name}</span>
+                    ${doc.status === 'pending' ? `
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                            Upload
+                        </button>
+                    ` : `
+                        <span class="px-3 py-1 ${
+                            doc.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            'bg-yellow-100 text-yellow-800'
+                        } rounded-full text-sm">
+                            ${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                        </span>
+                    `}
+                </div>`;
+        });
+    }
+}
+
+// Poll for updates every 5 seconds
+setInterval(async () => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+        try {
+            const response = await fetch(`/api/document-status/${userId}`);
+            const data = await response.json();
+            if (data.success) {
+                if (data.onboardingStatus === 'not-started') {
+                    document.getElementById('notStartedView').classList.remove('hidden');
+                    document.getElementById('onboardingView').classList.add('hidden');
+                } else {
+                    document.getElementById('notStartedView').classList.add('hidden');
+                    document.getElementById('onboardingView').classList.remove('hidden');
+                    updateOnboardingProgress(data);
+                }
+            }
+        } catch (error) {
+            console.error('Error polling status:', error);
+        }
+    }
+}, 5000);
 </script>
 </body>
 </html>
-<!DOCTYPE html>
-

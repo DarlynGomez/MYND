@@ -155,15 +155,26 @@ app.post('/api/login', (req, res) => {
         const userRole = isAdmin ? 'Admin' : 'Student';
         const redirectTo = isAdmin ? '/hrAdmin.html' : '/job-landing.html';
         
-        // Generate a more secure admin token
+        // Generate admin token if admin
         const adminToken = isAdmin ? `admin-${Date.now()}-${Math.random().toString(36).substring(2, 15)}` : null;
 
-        const { password: _, ...userWithoutPassword } = user;
-        
-        // If admin, store the token in active admin tokens
+        // Store token if admin
         if (isAdmin) {
             activeAdminTokens.set(adminToken, user.id);
         }
+
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+        
+        console.log('Sending login response:', {
+            success: true,
+            user: {
+                ...userWithoutPassword,
+                role: userRole
+            },
+            adminToken,
+            redirectTo
+        });
 
         res.json({
             success: true,
@@ -175,6 +186,20 @@ app.post('/api/login', (req, res) => {
             redirectTo
         });
 
+        const responseData = {
+            success: true,
+            user: {
+                ...userWithoutPassword,
+                role: userRole,
+                emplId: user.profile.emplId  // Make sure EMPLID is included
+            },
+            adminToken,
+            redirectTo
+        };
+
+        console.log('Sending login response with EMPLID:', responseData);
+        res.json(responseData);
+
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({
@@ -183,6 +208,10 @@ app.post('/api/login', (req, res) => {
             error: error.message
         });
     }
+});
+
+app.get('/hronboarding.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'hronboarding.html'));
 });
 
 const activeAdminTokens = new Map();
@@ -307,12 +336,18 @@ app.get('/api/admin/user/:emplId', adminAuthMiddleware, (req, res) => {
 });
 
 // Update onboarding status
+// Update onboarding status
 app.put('/api/admin/onboarding-status', adminAuthMiddleware, (req, res) => {
     try {
         const { emplId, status } = req.body;
+        console.log(`Updating onboarding status for EMPLID ${emplId} to ${status}`); // Debug log
         
-        const userIndex = users.findIndex(u => u.profile.emplId === emplId);
+        const userIndex = users.findIndex(u => 
+            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+        );
+
         if (userIndex === -1) {
+            console.log('Student not found with EMPLID:', emplId); // Debug log
             return res.status(404).json({
                 success: false,
                 message: 'Student not found'
@@ -324,14 +359,22 @@ app.put('/api/admin/onboarding-status', adminAuthMiddleware, (req, res) => {
 
         // If status is changed to 'in-progress', initialize documents
         if (status === 'in-progress') {
+            console.log('Initializing documents for student'); // Debug log
+            
+            // Create fresh copy of document template
             users[userIndex].profile.documents = documentsTemplate.map(doc => ({...doc}));
+            
+            // Initialize document counts
             users[userIndex].profile.documentCounts = {
                 completed: 0,
                 pending: documentsTemplate.length,
                 processing: 0
             };
+
+            console.log('Updated user profile:', users[userIndex].profile); // Debug log
         }
 
+        // Return updated profile
         res.json({
             success: true,
             message: 'Onboarding status updated',
@@ -349,57 +392,44 @@ app.put('/api/admin/onboarding-status', adminAuthMiddleware, (req, res) => {
 });
 
 // Update document status
-app.put('/api/admin/document-status', adminAuthMiddleware, (req, res) => {
+app.get('/api/document-status/:emplId', (req, res) => {
     try {
-        const { emplId, documentId, status } = req.body;
+        const { emplId } = req.params;
+        console.log(`[GET /api/document-status] Requested EMPLID:`, emplId);
         
-        const userIndex = users.findIndex(u => u.profile.emplId === emplId);
-        if (userIndex === -1) {
+        const user = users.find(u => 
+            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+        );
+        
+        console.log(`[GET /api/document-status] Found user:`, user);
+        
+        if (!user) {
+            console.log(`[GET /api/document-status] No user found for EMPLID:`, emplId);
             return res.status(404).json({
                 success: false,
                 message: 'Student not found'
             });
         }
 
-        if (!users[userIndex].profile.documents) {
-            users[userIndex].profile.documents = documentsTemplate.map(doc => ({...doc}));
-        }
-
-        const docIndex = users[userIndex].profile.documents.findIndex(d => d.id === documentId);
-        if (docIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Document not found'
-            });
-        }
-
-        // Update document status
-        users[userIndex].profile.documents[docIndex].status = status;
-
-        // Update document counts
-        const docs = users[userIndex].profile.documents;
-        users[userIndex].profile.documentCounts = {
-            completed: docs.filter(d => d.status === 'approved').length,
-            pending: docs.filter(d => d.status === 'pending').length,
-            processing: docs.filter(d => d.status === 'processing').length
+        const response = {
+            success: true,
+            onboardingStatus: user.profile.onboardingStatus || 'not-started',
+            documents: user.profile.documents || [],
+            documentCounts: user.profile.documentCounts || {
+                completed: 0,
+                pending: 0,
+                processing: 0
+            }
         };
 
-        // Check if all documents are approved and update onboarding status
-        if (users[userIndex].profile.documentCounts.completed === docs.length) {
-            users[userIndex].profile.onboardingStatus = 'onboarded';
-        }
-
-        res.json({
-            success: true,
-            message: 'Document status updated',
-            profile: users[userIndex].profile
-        });
+        console.log(`[GET /api/document-status] Sending response:`, response);
+        res.json(response);
 
     } catch (error) {
-        console.error('Error updating document status:', error);
+        console.error('[GET /api/document-status] Error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error updating document status',
+            message: 'Error getting document status',
             error: error.message
         });
     }

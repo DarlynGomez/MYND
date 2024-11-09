@@ -7,115 +7,75 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
-<!-- Navigation Bar -->
 <nav class="bg-blue-600 text-white p-4 shadow-lg">
     <div class="container mx-auto">
         <h1 class="text-xl font-bold">Document Tracking & Holds</h1>
     </div>
 </nav>
 
-<!-- Main Content -->
 <main class="container mx-auto p-4 space-y-6">
-    <!-- Status Overview -->
-    <div id="statusContainer">
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-4">Document Status Overview</h2>
-            <div class="grid md:grid-cols-3 gap-4">
-                <div class="bg-orange-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-orange-800">Documents Pending</h3>
-                    <p class="text-3xl font-bold text-orange-600"></p>
-                </div>
-                <div class="bg-green-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-green-800">Documents Completed</h3>
-                    <p class="text-3xl font-bold text-green-600"></p>
-                </div>
-                <div class="bg-blue-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-blue-800">In Processing</h3>
-                    <p class="text-3xl font-bold text-blue-600"></p>
+    <!-- Debug Info (temporary) -->
+    <div id="debugInfo" class="bg-gray-100 p-4 rounded-lg mb-4 font-mono text-sm">
+        Waiting for data...
+    </div>
+
+    <!-- Not Started View -->
+    <div id="notStartedView" class="hidden">
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div class="flex">
+                <div class="ml-3">
+                    <h3 class="text-lg font-medium text-yellow-800">
+                        Onboarding Not Started
+                    </h3>
+                    <p class="mt-2 text-yellow-700">
+                        Please apply for a position first. Once HR approves your application, 
+                        you will be able to start the onboarding process.
+                    </p>
+                    <div class="mt-4">
+                        <button 
+                            onclick="window.location.href='job-landing.html'"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            View Available Positions
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Document Holds Section -->
-    <div id="documentSections" class="grid md:grid-cols-2 gap-6">
-        <div class="grid md:grid-cols-2 gap-6">
-            <!-- In-Person Document Holds -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4 text-red-600">In-Person Document Holds</h2>
-                <div class="space-y-4">
-                    <div class="border-l-4 border-red-500 pl-4 py-2">
-                        <h3 class="font-semibold">Original I-9 Documentation</h3>
-                        <p class="text-sm text-gray-600">Submit to: HR Office (Room S-701)</p>
-                        <p class="text-sm text-gray-600">Deadline: Within 3 days of start date</p>
-                        <span class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">Required In-Person</span>
-                    </div>
-                    <div class="border-l-4 border-red-500 pl-4 py-2">
-                        <h3 class="font-semibold">Social Security Card</h3>
-                        <p class="text-sm text-gray-600">Submit to: Payroll Office (Room S-702)</p>
-                        <p class="text-sm text-gray-600">Deadline: Before first paycheck</p>
-                        <span class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">Required In-Person</span>
-                    </div>
+    <!-- Onboarding View -->
+    <div id="onboardingView" class="hidden">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-4">Document Status Overview</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-orange-100 p-4 rounded-lg">
+                    <h3 class="font-semibold text-orange-800">Documents Pending</h3>
+                    <p id="pendingCount" class="text-3xl font-bold text-orange-600">0</p>
                 </div>
-            </div>
-
-            <!-- Online Submit Holds -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4 text-orange-600">Online Submit Holds</h2>
-                <div class="space-y-4">
-                    <div class="border-l-4 border-orange-500 pl-4 py-2">
-                        <h3 class="font-semibold">W-4 Form</h3>
-                        <p class="text-sm text-gray-600">Status: Pending Submission</p>
-                        <div class="mt-2 flex gap-2">
-                            <button class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition" onclick="handleDocumentUpload('w4')">Upload</button>
-                            <a href="#" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition">Download Form</a>
-                        </div>
-                    </div>
-                    <div class="border-l-4 border-orange-500 pl-4 py-2">
-                        <h3 class="font-semibold">Direct Deposit Form</h3>
-                        <p class="text-sm text-gray-600">Status: Pending Submission</p>
-                        <div class="mt-2 flex gap-2">
-                            <button class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition" onclick="handleDocumentUpload('direct-deposit')">Upload</button>
-                            <a href="#" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition">Download Form</a>
-                        </div>
-                    </div>
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800">Documents Completed</h3>
+                    <p id="completedCount" class="text-3xl font-bold text-green-600">0</p>
+                </div>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800">In Processing</h3>
+                    <p id="processingCount" class="text-3xl font-bold text-blue-600">0</p>
                 </div>
             </div>
         </div>
 
-        <!-- Shared Checklist -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">Document Checklist</h2>
-                <span class="text-sm text-gray-600">Last updated: Today, 2:30 PM</span>
+        <!-- Document Sections -->
+        <div class="grid md:grid-cols-2 gap-6 mt-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 text-red-600">In-Person Document Holds</h2>
+                <div id="inPersonDocs" class="space-y-4">
+                    <!-- Will be populated by JavaScript -->
+                </div>
             </div>
-            <div class="space-y-4">
-                <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="w-5 h-5 text-blue-600" checked disabled>
-                    <div class="flex-1">
-                        <h3 class="font-semibold">Employment Eligibility Form (I-9)</h3>
-                        <p class="text-sm text-gray-600">Submitted on Oct 15, 2024</p>
-                    </div>
-                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Completed</span>
-                </div>
 
-                <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="w-5 h-5 text-blue-600">
-                    <div class="flex-1">
-                        <h3 class="font-semibold">Federal Tax Withholding (W-4)</h3>
-                        <p class="text-sm text-gray-600">Due by: Oct 20, 2024</p>
-                    </div>
-                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Pending</span>
-                </div>
-
-                <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="w-5 h-5 text-blue-600">
-                    <div class="flex-1">
-                        <h3 class="font-semibold">Direct Deposit Authorization</h3>
-                        <p class="text-sm text-gray-600">Due by: Oct 20, 2024</p>
-                    </div>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">In Review</span>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 text-orange-600">Online Submit Holds</h2>
+                <div id="onlineDocs" class="space-y-4">
+                    <!-- Will be populated by JavaScript -->
                 </div>
             </div>
         </div>
@@ -123,187 +83,113 @@
 </main>
 
 <script>
-    // Get user info from localStorage
-    const userId = localStorage.getItem('userId');
-    const userEmail = localStorage.getItem('userEmail');
+// Debug function to display raw data
+function updateDebugInfo(data) {
+    const debugInfo = document.getElementById('debugInfo');
+    debugInfo.textContent = JSON.stringify(data, null, 2);
+}
 
-    async function fetchDocumentStatus() {
-        try {
-            const response = await fetch(`/api/document-status/${userId}`);
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Error fetching status');
-            }
-
-            if (data.success) {
-                updateUI(data);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            showError(error.message);
+async function fetchDocumentStatus() {
+    try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            console.error('No user ID found');
+            return;
         }
+
+        console.log('Fetching status for userId:', userId);
+        const response = await fetch(`/api/document-status/${userId}`);
+        const data = await response.json();
+        
+        // Debug display
+        updateDebugInfo(data);
+        
+        console.log('Received data:', data);
+        
+        if (data.success) {
+            updateUI(data);
+        } else {
+            console.error('Error in response:', data);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        updateDebugInfo({ error: error.message });
     }
+}
 
-
-
-
-    function updateUI(data) {
-    const statusContainer = document.getElementById('statusContainer');
-    const documentSections = document.getElementById('documentSections');
+function updateUI(data) {
+    console.log('Updating UI with status:', data.onboardingStatus);
+    
+    const notStartedView = document.getElementById('notStartedView');
+    const onboardingView = document.getElementById('onboardingView');
 
     if (data.onboardingStatus === 'not-started') {
-        // Show not started message
-        statusContainer.innerHTML = `
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                <div class="flex">
-                    <div class="ml-3">
-                        <h3 class="text-lg font-medium text-yellow-800">
-                            Onboarding Not Started
-                        </h3>
-                        <p class="mt-2 text-yellow-700">
-                            Please apply for a position first. Once HR approves your application, 
-                            you will be able to start the onboarding process.
-                        </p>
-                        <div class="mt-4">
-                            <button 
-                                onclick="window.location.href='job-landing.html'"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                View Available Positions
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        documentSections.innerHTML = '';
+        notStartedView.classList.remove('hidden');
+        onboardingView.classList.add('hidden');
+    } else {
+        notStartedView.classList.add('hidden');
+        onboardingView.classList.remove('hidden');
+
+        // Update counts
+        document.getElementById('pendingCount').textContent = data.documentCounts.pending;
+        document.getElementById('completedCount').textContent = data.documentCounts.completed;
+        document.getElementById('processingCount').textContent = data.documentCounts.processing;
+
+        // Update documents
+        updateDocuments(data.documents);
+    }
+}
+
+function updateDocuments(documents) {
+    const inPersonDocs = documents.filter(doc => doc.submitInPerson);
+    const onlineDocs = documents.filter(doc => !doc.submitInPerson);
+
+    // Update in-person documents
+    document.getElementById('inPersonDocs').innerHTML = inPersonDocs.map(doc => `
+        <div class="border-l-4 border-red-500 pl-4 py-2">
+            <h3 class="font-semibold">${doc.name}</h3>
+            <p class="text-sm text-gray-600">Submit to: HR Office (Room S-701)</p>
+            <p class="text-sm text-gray-600">Deadline: ${doc.deadline}</p>
+            <span class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+                Required In-Person
+            </span>
+        </div>
+    `).join('');
+
+    // Update online documents
+    document.getElementById('onlineDocs').innerHTML = onlineDocs.map(doc => `
+        <div class="border-l-4 border-orange-500 pl-4 py-2">
+            <h3 class="font-semibold">${doc.name}</h3>
+            <p class="text-sm text-gray-600">Status: ${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}</p>
+            <div class="mt-2 flex gap-2">
+                ${doc.status === 'pending' ? `
+                    <button onclick="handleDocumentUpload('${doc.id}')" 
+                            class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                        Upload
+                    </button>
+                ` : ''}
+                <a href="#" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+                    Download Form
+                </a>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        window.location.href = 'index.html';
         return;
     }
 
-    // Show document status overview
-    statusContainer.innerHTML = `
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-4">Document Status Overview</h2>
-            <div class="grid md:grid-cols-3 gap-4">
-                <div class="bg-orange-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-orange-800">Documents Pending</h3>
-                    <p class="text-3xl font-bold text-orange-600">${data.documentCounts.pending}</p>
-                </div>
-                <div class="bg-green-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-green-800">Documents Completed</h3>
-                    <p class="text-3xl font-bold text-green-600">${data.documentCounts.completed}</p>
-                </div>
-                <div class="bg-blue-100 p-4 rounded-lg">
-                    <h3 class="font-semibold text-blue-800">In Processing</h3>
-                    <p class="text-3xl font-bold text-blue-600">${data.documentCounts.processing}</p>
-                </div>
-            </div>
-        </div>`;
-
-    // Split documents into in-person and online submission
-    const inPersonDocs = data.documents.filter(doc => doc.submitInPerson);
-    const onlineDocs = data.documents.filter(doc => !doc.submitInPerson);
-
-    documentSections.innerHTML = `
-        <!-- In-Person Documents -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-4 text-red-600">In-Person Document Holds</h2>
-            <div class="space-y-4">
-                ${inPersonDocs.map(doc => `
-                    <div class="border-l-4 border-red-500 pl-4 py-2">
-                        <h3 class="font-semibold">${doc.name}</h3>
-                        <p class="text-sm text-gray-600">Submit to: HR Office (Room S-701)</p>
-                        <p class="text-sm text-gray-600">Deadline: ${doc.deadline}</p>
-                        <span class="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-                            Required In-Person
-                        </span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-
-        <!-- Online Documents -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-4 text-orange-600">Online Submit Holds</h2>
-            <div class="space-y-4">
-                ${onlineDocs.map(doc => `
-                    <div class="border-l-4 border-orange-500 pl-4 py-2">
-                        <h3 class="font-semibold">${doc.name}</h3>
-                        <p class="text-sm text-gray-600">Status: ${doc.status}</p>
-                        <div class="mt-2 flex gap-2">
-                            ${doc.status === 'pending' ? `
-                                <button onclick="handleDocumentUpload('${doc.id}')" 
-                                        class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                                    Upload
-                                </button>
-                            ` : ''}
-                            <a href="#" class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-                                Download Form
-                            </a>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>`;
-    }
-
-    async function handleDocumentUpload(documentId) {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = '.pdf,.doc,.docx';
-        
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('document', file);
-            formData.append('emplId', userId);
-            formData.append('documentId', documentId);
-
-            try {
-                const response = await fetch('/api/submit-document', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    // Refresh the document status
-                    fetchDocumentStatus();
-                } else {
-                    alert(data.message || 'Error uploading document');
-                }
-            } catch (error) {
-                console.error('Upload error:', error);
-                alert('Error uploading document');
-            }
-        };
-
-        fileInput.click();
-    }
-
-    function showError(message) {
-        const statusContainer = document.getElementById('statusContainer');
-        statusContainer.innerHTML = `
-            <div class="bg-red-50 border-l-4 border-red-400 p-4">
-                <div class="flex">
-                    <div class="ml-3">
-                        <h3 class="text-lg font-medium text-red-800">Error</h3>
-                        <p class="mt-2 text-red-700">${message}</p>
-                    </div>
-                </div>
-            </div>`;
-    }
-
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!userId) {
-            window.location.href = 'index.html';
-            return;
-        }
-        fetchDocumentStatus();
-    });
-
+    // Initial fetch
+    fetchDocumentStatus();
+    
+    // Poll for updates
+    setInterval(fetchDocumentStatus, 5000);
+});
 </script>
 </body>
 </html>
