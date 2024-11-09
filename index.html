@@ -151,20 +151,18 @@
 
                 const data = await response.json();
 
+                // In the login success handler
                 if (data.success) {
                     // Store all necessary data in localStorage
-                    localStorage.setItem('userId', data.user.id);
+                    localStorage.setItem('userId', data.user.profile.emplId); // Store EMPLID instead of internal ID
                     localStorage.setItem('userEmail', data.user.email);
                     localStorage.setItem('userName', data.user.name);
                     localStorage.setItem('userRole', data.user.role);
                     
-                    // Store admin token if present
                     if (data.adminToken) {
                         localStorage.setItem('adminToken', data.adminToken);
-                        console.log('Admin token stored:', data.adminToken); // Debug log
                     }
                     
-                    // Redirect to appropriate page
                     window.location.href = data.redirectTo;
                 } else {
                     messageEl.textContent = data.message || 'Invalid credentials';

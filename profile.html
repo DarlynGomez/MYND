@@ -502,309 +502,149 @@
     </main>
 
     <script>
-        // Initialize profile
         document.addEventListener('DOMContentLoaded', async function() {
             const userId = localStorage.getItem('userId');
+            const userName = localStorage.getItem('userName');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            console.log('Initial load - User info:', { userId, userName, userEmail });
+    
+            // Update initial display
+            if (userName) {
+                document.getElementById('profileName').textContent = userName;
+                document.getElementById('profileInitial').textContent = userName.charAt(0).toUpperCase();
+            }
+            if (userEmail) {
+                document.getElementById('profileEmail').textContent = userEmail;
+            }
+    
             if (!userId) {
+                console.log('No user ID found, redirecting to login');
                 window.location.href = 'index.html';
                 return;
             }
-
+    
+            // Initialize transcript upload handling
+            const transcriptInput = document.getElementById('transcript');
+            const dropZone = document.querySelector('.upload-container');
+    
+            transcriptInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+    
+                if (file.type !== 'application/pdf') {
+                    alert('Please upload a PDF file');
+                    return;
+                }
+    
+                const formData = new FormData();
+                formData.append('transcript', file);
+                formData.append('emplId', userId);
+    
+                try {
+                    showStatus('Analyzing transcript...', 'info');
+                    const response = await fetch('/api/upload-transcript', {
+                        method: 'POST',
+                        body: formData
+                    });
+    
+                    const data = await response.json();
+                    console.log('Transcript analysis response:', data);
+    
+                    if (data.success) {
+                        showStatus('Transcript analyzed successfully!', 'success');
+                        updateProfileDisplay(data.user.profile);
+                    } else {
+                        showStatus(data.message || 'Error processing transcript', 'error');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    showStatus('Error uploading transcript', 'error');
+                }
+            });
+    
+            // Load initial profile data
             try {
                 const response = await fetch(`/api/profile/${userId}`);
-                const userData = await response.json();
-                console.log('Initial profile load:', userData); // Debug log
-                populateProfile(userData);
+                const data = await response.json();
+                console.log('Profile data loaded:', data);
+                
+                if (data.success) {
+                    updateProfileDisplay(data.profile);
+                }
             } catch (error) {
                 console.error('Error loading profile:', error);
                 showStatus('Error loading profile data', 'error');
             }
         });
-
-        // Handle profile picture
-        document.getElementById('profilePicture').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.querySelector('.profile-picture').style.backgroundImage = `url(${e.target.result})`;
-                    document.getElementById('profileInitial').style.display = 'none';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Handle transcript upload
-        // Updated transcript upload handler
-        document.getElementById('transcript').addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('transcript', file);
-            formData.append('emplId', document.getElementById('emplId').value);
-
-            showStatus('Analyzing transcript...', 'info');
-
-            try {
-                const response = await fetch('/api/upload-transcript', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                console.log('Transcript analysis response:', data);
-
-                if (data.success) {
-                    showStatus('Transcript analyzed successfully!', 'success');
-                    // Update profile with analyzed data
-                    populateProfile(data.user);
-                    
-                    // Log the courses to verify they're being received
-                    console.log('Received courses:', data.user.profile.courses);
-                } else {
-                    showStatus(data.message || 'Error processing transcript', 'error');
-                }
-            } catch (error) {
-                showStatus('Error uploading transcript', 'error');
-                console.error('Upload error:', error);
-            }
-        });
-
-        // Separate function for populating courses
-        function populateCourses(courses) {
-            const coursesGrid = document.getElementById('coursesGrid');
-            if (!coursesGrid) {
-                console.error('Courses grid element not found!');
-                return;
-            }
-
-            coursesGrid.innerHTML = ''; // Clear existing courses
-            console.log('Populating courses:', courses); // Debug log
-
-            if (courses && courses.length > 0) {
-                courses.forEach(course => {
-                    const courseCard = document.createElement('div');
-                    courseCard.className = 'course-card';
-                    
-                    // Add a data attribute for debugging
-                    courseCard.dataset.courseId = course.courseId;
-                    
-                    courseCard.innerHTML = `
+    
+        function updateProfileDisplay(profile) {
+            if (!profile) return;
+    
+            // Update basic info
+            document.getElementById('emplId').value = profile.emplId || '';
+            document.getElementById('major').value = profile.major || '';
+            document.getElementById('gpa').value = profile.gpa || '';
+            
+            // Update courses if they exist
+            if (profile.courses && profile.courses.length > 0) {
+                const coursesGrid = document.getElementById('coursesGrid');
+                coursesGrid.innerHTML = profile.courses.map(course => `
+                    <div class="course-card">
                         <div class="course-header">
                             <span class="course-id">${course.courseId}</span>
-                            <span class="course-grade ${getGradeClass(course.grade)}">${course.grade}</span>
+                            <span class="course-grade grade-${getGradeClass(course.grade)}">${course.grade}</span>
                         </div>
                         <div class="course-name">${course.courseName}</div>
-                        <div class="course-credits">${course.credits} Credits</div>
-                    `;
-                    coursesGrid.appendChild(courseCard);
-                });
-            } else {
-                coursesGrid.innerHTML = '<p>No courses found</p>';
+                        <div class="course-credits">${course.credits} Credits • ${course.term}</div>
+                    </div>
+                `).join('');
+            }
+    
+            // Update skills if they exist
+            if (profile.skills && profile.skills.length > 0) {
+                const skillsContainer = document.getElementById('skillsContainer');
+                skillsContainer.innerHTML = profile.skills.map(skill => `
+                    <div class="skill-tag">
+                        ${skill}
+                    </div>
+                `).join('');
             }
         }
-
-
-        // Skills handling
-        const skillInput = document.getElementById('skillInput');
-        const skillsContainer = document.getElementById('skillsContainer');
-        let skills = new Set();
-
-        skillInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const skill = this.value.trim();
-                if (skill) {
-                    addSkill(skill);
-                    this.value = '';
-                }
-            }
-        });
-
-        function addSkill(skill) {
-            if (!skills.has(skill)) {
-                skills.add(skill);
-                const skillTag = document.createElement('div');
-                skillTag.className = 'skill-tag';
-                skillTag.innerHTML = `
-                    ${skill}
-                    <button onclick="removeSkill(this, '${skill}')">&times;</button>
-                `;
-                skillsContainer.appendChild(skillTag);
-            }
-        }
-
-        function removeSkill(button, skill) {
-            skills.delete(skill);
-            button.parentElement.remove();
-        }
-
-        // Form submission
-        async function handleProfileSubmit(event) {
-            event.preventDefault();
-
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
-                showStatus('User not authenticated', 'error');
-                return;
-            }
-
-            const profileData = {
-                emplId: document.getElementById('emplId').value,
-                major: document.getElementById('major').value,
-                gpa: parseFloat(document.getElementById('gpa').value),
-                expectedGraduation: document.getElementById('expectedGraduation').value,
-                skills: Array.from(skills),
-                experience: document.getElementById('experience').value
-            };
-
-            try {
-                const response = await fetch(`/api/profile/${userId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(profileData)
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showStatus('Profile updated successfully!', 'success');
-                } else {
-                    showStatus(data.message || 'Error updating profile', 'error');
-                }
-            } catch (error) {
-                console.error('Profile update error:', error);
-                showStatus('Error updating profile', 'error');
-            }
-        }
-
-        // Populate profile with existing data
-        function populateProfile(userData) {
-            // Set basic info
-            document.getElementById('profileName').textContent = userData.name || 'User';
-            document.getElementById('profileEmail').textContent = userData.email || '';
-            document.getElementById('profileInitial').textContent = 
-                (userData.name || 'U').charAt(0).toUpperCase();
-
-            // Set form values
-            if (userData.profile) {
-                document.getElementById('emplId').value = userData.profile.emplId || '';
-                document.getElementById('major').value = userData.profile.major || '';
-                document.getElementById('gpa').value = userData.profile.gpa || '';
-                document.getElementById('expectedGraduation').value = 
-                    userData.profile.expectedGraduation || '';
-                document.getElementById('experience').value = 
-                    userData.profile.experience || '';
-
-                // Set skills
-                skillsContainer.innerHTML = '';
-                skills.clear();
-                if (userData.profile.skills) {
-                    userData.profile.skills.forEach(skill => addSkill(skill));
-                }
-
-                // Populate courses
-                populateCourses(userData.profile.courses);
-            }
-        }
-
-        // Grade class helper function
+    
         function getGradeClass(grade) {
-            if (!grade) return 'grade-other';
-            if (grade.startsWith('A')) return 'grade-a';
-            if (grade.startsWith('B')) return 'grade-b';
-            if (grade.startsWith('C')) return 'grade-c';
-            return 'grade-other';
+            if (grade.startsWith('A')) return 'a';
+            if (grade.startsWith('B')) return 'b';
+            if (grade.startsWith('C')) return 'c';
+            return 'other';
         }
-
-        // Show status messages
+    
         function showStatus(message, type) {
             const statusEl = document.getElementById('uploadStatus');
+            if (!statusEl) return;
+            
             statusEl.textContent = message;
             statusEl.className = `status-message ${type}`;
             
-            // Auto-hide success messages
             if (type === 'success') {
                 setTimeout(() => {
-                    statusEl.style.display = 'none';
+                    statusEl.textContent = '';
+                    statusEl.className = 'status-message';
                 }, 3000);
             }
         }
-
-        // Reset form
+    
+        function handleProfileSubmit(event) {
+            event.preventDefault();
+            // Add any profile update logic here
+        }
+    
         function resetForm() {
             if (confirm('Are you sure you want to reset the form? All unsaved changes will be lost.')) {
                 document.getElementById('profileForm').reset();
-                skillsContainer.innerHTML = '';
-                skills.clear();
-                showStatus('Form reset successfully', 'info');
+                document.getElementById('skillsContainer').innerHTML = '';
             }
         }
-
-        // Handle logout
-        function handleLogout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        // Add this to handle file drag and drop
-        const uploadContainer = document.querySelector('.upload-container');
-
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadContainer.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadContainer.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadContainer.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            uploadContainer.classList.add('highlight');
-        }
-
-        function unhighlight(e) {
-            uploadContainer.classList.remove('highlight');
-        }
-
-        uploadContainer.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-            
-            if (file && file.type === 'application/pdf') {
-                document.getElementById('transcript').files = dt.files;
-                document.getElementById('transcript').dispatchEvent(new Event('change'));
-            } else {
-                showStatus('Please upload a PDF file', 'error');
-            }
-        }
-
-        // Add responsive sidebar toggle for mobile
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('active');
-        }
-
-        // Add window resize handler for responsive design
-        window.addEventListener('resize', function() {
-            const sidebar = document.querySelector('.sidebar');
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-            }
-        });
     </script>
 </body>
 </html>
