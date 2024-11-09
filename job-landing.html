@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    <!-- Job Landing Page -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -512,6 +513,7 @@
         document.querySelector('.profile-name').textContent = userName;
 
         // Content loading function
+        // Add this to your existing loadContent function in job-landing.html
         async function loadContent(section) {
             const mainContent = document.getElementById('mainContent');
             
@@ -521,29 +523,169 @@
             });
             event.currentTarget.classList.add('active');
 
-            // Load appropriate content based on section
-            switch(section) {
-                case 'dashboard':
-                    mainContent.innerHTML = await loadDashboardContent();
-                    break;
-                case 'campus-jobs':
-                    mainContent.innerHTML = await loadJobsContent();
-                    break;
-                case 'hr':
-                    mainContent.innerHTML = await loadHRContent();
-                    break;
+            if (section === 'campus-jobs') {
+                // Use the content handler for jobs view
+                await contentHandler.loadContent('campus-jobs');
+            } else {
+                // Load other content as before
+                switch(section) {
+                    case 'dashboard':
+                        mainContent.innerHTML = await loadDashboardContent();
+                        break;
+                    case 'hr':
+                        await contentHandler.loadContent('hr');
+                        break;
+                }
             }
         }
 
         // Sample content loading functions
         async function loadDashboardContent() {
-            return `
-                <div class="content-header">
-                    <h1>Dashboard</h1>
-                    <p>Welcome back, ${userName}</p>
-                </div>
-                <!-- Add dashboard content -->
-            `;
+            try {
+                const userId = localStorage.getItem('userId');
+                const response = await fetch(`/api/recommendations/${userId}`);
+                const recommendations = await response.json();
+
+                return `
+                    <div class="content-header">
+                        <h1 class="text-3xl font-bold text-blue-800 mb-4">Dashboard</h1>
+                        <p class="text-gray-600 mb-8">Welcome back, ${localStorage.getItem('userName')}</p>
+                    </div>
+
+                    <!-- Recommendations Section -->
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-blue-700 mb-4">Recommended Jobs</h2>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${recommendations.map(job => `
+                                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                    <div class="p-6">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <h3 class="text-xl font-bold text-blue-800">${job.title}</h3>
+                                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                                ${job.matchScore}% Match
+                                            </span>
+                                        </div>
+                                        <p class="text-gray-600 mb-4">${job.description}</p>
+                                        
+                                        <!-- Match Details -->
+                                        <div class="mb-4">
+                                            <h4 class="font-semibold text-gray-700 mb-2">Why this matches you:</h4>
+                                            <ul class="space-y-2">
+                                                ${job.matchDetails.map(detail => `
+                                                    <li class="flex items-center text-sm text-gray-600">
+                                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        ${detail}
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+
+                                        <!-- Job Details -->
+                                        <div class="space-y-2 mb-4">
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                </svg>
+                                                ${job.wage}/hour
+                                            </div>
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                ${job.hoursPerWeek} hrs/week
+                                            </div>
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                                </svg>
+                                                ${job.department}
+                                            </div>
+                                        </div>
+
+                                        <button onclick="applyForJob('${job.id}')" 
+                                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition duration-300">
+                                            Apply Now
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-2">Your Applications</h3>
+                            <p class="text-3xl font-bold text-blue-600">0</p>
+                            <p class="text-sm text-gray-600">Active applications</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-2">Profile Match</h3>
+                            <p class="text-3xl font-bold text-green-600">${Math.max(...recommendations.map(r => r.matchScore))}%</p>
+                            <p class="text-sm text-gray-600">Best job match</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-2">Available Jobs</h3>
+                            <p class="text-3xl font-bold text-orange-600">${recommendations.length}</p>
+                            <p class="text-sm text-gray-600">Matching your profile</p>
+                        </div>
+                    </div>
+
+                    <!-- Profile Completion Tips -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold text-blue-800 mb-4">Improve Your Matches</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Complete Your Profile</h3>
+                                    <p class="text-gray-600">Add your skills, courses, and work preferences to get better job matches.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-blue-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">Upload Your Transcript</h3>
+                                    <p class="text-gray-600">Let us analyze your academic record to find the best job matches.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                return `
+                    <div class="text-center text-red-600">
+                        Error loading dashboard content. Please try again later.
+                    </div>
+                `;
+            }
+        }
+
+        function formatWage(wage) {
+            return `$${wage.toFixed(2)}`;
+        }
+
+        function getMatchColor(score) {
+            if (score >= 80) return 'bg-green-100 text-green-800';
+            if (score >= 60) return 'bg-blue-100 text-blue-800';
+            return 'bg-gray-100 text-gray-800';
+        }
+
+        function formatMatchDetails(details) {
+            if (!Array.isArray(details)) return [];
+            return details.map(detail => {
+                if (detail.includes('match')) {
+                    return detail;
+                }
+                return `Matches your ${detail.toLowerCase()}`;
+            });
         }
 
         async function loadJobsContent() {
@@ -579,6 +721,21 @@
             localStorage.clear();
             window.location.href = 'index.html';
         }
+    </script>
+     <script>
+        window.watsonAssistantChatOptions = {
+            integrationID: "8961b985-7e91-4094-bc90-39bd7ac80d81",
+            region: "au-syd",
+            serviceInstanceID: "f863128e-d2b9-4f49-90a4-2f9102d5aecd",
+            onLoad: async (instance) => { await instance.render(); }
+        };
+        setTimeout(function(){
+            const t = document.createElement('script');
+            t.src = "https://web-chat.global.assistant.watson.appdomain.cloud/versions/" + 
+                    (window.watsonAssistantChatOptions.clientVersion || 'latest') + 
+                    "/WatsonAssistantChatEntry.js";
+            document.head.appendChild(t);
+        });
     </script>
 </body>
 </html>

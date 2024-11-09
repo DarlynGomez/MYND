@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- Mentor Page -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMCC Mentor Positions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #003d82;
+            --secondary-color: #0056b3;
+            --accent-color: #ffd700;
+            --background-color: #f5f7fa;
+            --text-color: #333;
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #eaeaea;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 2rem;
+            background-color: var(--background-color);
+        }
+
+        .mentor-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .mentor-item:hover {
+            background-color: var(--background-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .mentor-item.active {
+            background-color: var(--background-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .nav-menu {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: #666;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+    <div class="sidebar-header p-6 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-800 rounded-lg"></div>
+            <span class="text-lg font-bold text-blue-800">BMCC Jobs</span>
+        </div>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <span>Mentor Positions</span>
+        </a>
+    </nav>
+
+    <div class="user-profile p-6 border-t border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-blue-800">
+                J
+            </div>
+            <div>
+                <div class="font-medium">John Doe</div>
+                <div class="text-sm text-gray-500">Student</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-blue-800 mb-2">Mentor Positions</h1>
+        <p class="text-gray-600">Explore available mentoring opportunities at BMCC</p>
+    </div>
+
+    <!-- Two-Column Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Left Column - Mentor List -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Mentor position items -->
+            <div class="mentor-item p-4 cursor-pointer" data-mentor="impact">
+                <h3 class="font-semibold text-blue-800">Freshman IMPACT Mentor</h3>
+                <p class="text-sm text-gray-600">Help new students transition to college life</p>
+            </div>
+            <div class="mentor-item p-4 cursor-pointer border-t border-gray-100" data-mentor="firstgen">
+                <h3 class="font-semibold text-blue-800">First-Gen Mentor</h3>
+                <p class="text-sm text-gray-600">Support first-generation college students</p>
+            </div>
+            <div class="mentor-item p-4 cursor-pointer border-t border-gray-100" data-mentor="umla">
+                <h3 class="font-semibold text-blue-800">UMLA Mentor</h3>
+                <p class="text-sm text-gray-600">Academic support for math and science</p>
+            </div>
+            <div class="mentor-item p-4 cursor-pointer border-t border-gray-100" data-mentor="peer">
+                <h3 class="font-semibold text-blue-800">Peer Success Mentor</h3>
+                <p class="text-sm text-gray-600">Guide students in academic success</p>
+            </div>
+            <div class="mentor-item p-4 cursor-pointer border-t border-gray-100" data-mentor="career">
+                <h3 class="font-semibold text-blue-800">Career Mentor</h3>
+                <p class="text-sm text-gray-600">Help with career planning</p>
+            </div>
+        </div>
+
+        <!-- Right Column - Mentor Details -->
+        <div id="mentorDetails" class="md:col-span-2 bg-white rounded-lg shadow-md p-6">
+            <!-- Default content -->
+            <div class="text-center py-8">
+                <!-- Image container with smaller max width -->
+                <div class="max-w-xl mx-auto"> <!-- Changed from max-w-3xl to max-w-xl -->
+                    <img
+                            src="./images/mentor.jpg"
+                            alt="Mentor Program"
+                            class="w-full h-auto rounded-lg shadow-md"
+                            style="max-height: 400px; object-fit: contain">
+                </div>
+            </div>
+        </div>
+        </div>
+
+        </div>
+    </div>
+</main>
+
+<script>
+    // Mentor position details data
+    const mentorDetails = {
+        impact: {
+            title: "Freshman IMPACT Mentor",
+            pay: "$16.50/hour",
+            schedule: "10-15 hours/week",
+            requirements: [
+                "Minimum 3.0 GPA",
+                "Completed at least 24 credits at BMCC",
+                "Strong communication skills",
+                "Leadership experience preferred"
+            ],
+            responsibilities: [
+                "Guide new students through their first year",
+                "Conduct weekly mentoring sessions",
+                "Assist with orientation programs",
+                "Maintain regular communication with mentees",
+                "Track mentee progress and provide reports"
+            ],
+            benefits: [
+                "Professional development opportunities",
+                "Leadership experience",
+                "Networking with faculty and staff",
+                "Flexible schedule"
+            ]
+        },
+        firstgen: {
+            title: "First-Generation Mentor",
+            pay: "$16.50/hour",
+            schedule: "12-15 hours/week",
+            requirements: [
+                "Must be a first-generation college student",
+                "Minimum 3.0 GPA",
+                "Completed at least 30 credits",
+                "Strong interpersonal skills"
+            ],
+            responsibilities: [
+                "Support first-gen students in college transition",
+                "Provide academic and social support",
+                "Help navigate college resources",
+                "Organize workshops and events",
+                "Document mentee progress"
+            ],
+            benefits: [
+                "Make a difference in students' lives",
+                "Build leadership skills",
+                "Professional training",
+                "Flexible hours"
+            ]
+        },
+        // Add more mentor details here
+    };
+
+    // Function to update mentor details
+    function updateMentorDetails(mentorId) {
+        const details = mentorDetails[mentorId];
+        if (!details) return;
+
+        const detailsHtml = `
+                <h2 class="text-2xl font-bold text-blue-800 mb-6">${details.title}</h2>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-2">Position Details</h3>
+                        <p class="mb-2"><span class="font-medium">Pay Rate:</span> ${details.pay}</p>
+                        <p><span class="font-medium">Schedule:</span> ${details.schedule}</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-semibold text-blue-800 mb-2">Requirements</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            ${details.requirements.map(req => `<li>${req}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-semibold text-blue-800 mb-2">Key Responsibilities</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            ${details.responsibilities.map(resp => `<li class="text-gray-600">${resp}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-blue-800 mb-2">Benefits</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            ${details.benefits.map(benefit => `<li class="text-gray-600">${benefit}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button class="px-6 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition">
+                        Apply Now
+                    </button>
+                </div>
+            `;
+
+        document.getElementById('mentorDetails').innerHTML = detailsHtml;
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.mentor-item').forEach(item => {
+        item.addEventListener('click', function() {
+            // Remove active class from all items
+            document.querySelectorAll('.mentor-item').forEach(i => {
+                i.classList.remove('active');
+            });
+            // Add active class to clicked item
+            this.classList.add('active');
+            // Update details
+            updateMentorDetails(this.dataset.mentor);
+        });
+    });
+</script>
+</body>
+</html>

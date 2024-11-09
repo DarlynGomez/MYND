@@ -4,6 +4,8 @@ const path = require('path');
 const multer = require('multer');
 const app = express();
 
+// Interactivity of Server
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -479,6 +481,364 @@ app.get('/api/document-status/:emplId', (req, res) => {
         });
     }
 });
+
+// Add or update these parts in your server.js
+
+// Updated transcript upload endpoint with proper profile handling
+app.post('/api/upload-transcript', upload.single('transcript'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No file uploaded' 
+            });
+        }
+
+        const userEmplId = req.body.emplId;
+        console.log('Processing transcript for EMPLID:', userEmplId);
+
+        if (!userEmplId) {
+            return res.status(400).json({
+                success: false,
+                message: 'No EMPLID provided'
+            });
+        }
+
+        // Find user by EMPLID
+        const userIndex = users.findIndex(u => u.profile && u.profile.emplId === userEmplId);
+        
+        if (userIndex === -1) {
+            return res.status(404).json({ 
+                success: false, 
+                message: `No user found with EMPLID: ${userEmplId}` 
+            });
+        }
+
+        // Initialize profile if it doesn't exist
+        if (!users[userIndex].profile) {
+            users[userIndex].profile = {
+                emplId: userEmplId,
+                documents: [],
+                documentCounts: {
+                    completed: 0,
+                    pending: 0,
+                    processing: 0
+                },
+                onboardingStatus: 'not-started'
+            };
+        }
+
+        // For testing, use the hardcoded transcript text
+        const transcriptText = `2023 Fall Term
+Computer Science Major
+Academic Standing Effective 01/02/2024: Good Academic Standing
+Course Description Earn Grd
+CSC 101 Principles In Info Tech & Comp 3.00 A
+Req Designation: Flexible Core - Scientific World
+Contact Hours: 4.00
+ENG 121 Eng Comp & Intro to Literature 6.00 A
+Req Designation: Required Core - English Composition
+Contact Hours: 7.00
+MAT 206.5 Intermed Algebra & Precalculus 4.00 C+
+Req Designation: Required Core - Mathematical&QuantitativeReasoning
+Contact Hours: 8.00
+
+2024 Spring Term
+Computer Science Major
+Academic Standing Effective 06/03/2024: Good Academic Standing
+Course Description Earn Grd
+CRT 100 Critical Thinking 3.00 A
+Req Designation: Flexible Core - Individual and Society
+CSC 111 Introduction to Programming 4.00 A
+Req Designation: Flexible Core - Scientific World
+MAT 301 Analytic Geometry & Calc I 4.00 A
+Req Designation: Required Core - Mathematical&QuantitativeReasoning
+SPE 100 Fund of Public Speaking 3.00 A
+Req Designation: Flexible Core - Creative Expression`;
+
+        // Parse transcript data
+        const analyzedData = analyzeTranscript(transcriptText);
+        
+        // Update user profile with transcript data
+        users[userIndex].profile = {
+            ...users[userIndex].profile,
+            ...analyzedData,
+            transcriptUploaded: true,
+            lastTranscriptUpload: new Date()
+        };
+
+        // Return updated profile without password
+        const { password: _, ...updatedUser } = users[userIndex];
+        
+        console.log('Profile updated successfully for EMPLID:', userEmplId);
+
+        res.json({
+            success: true,
+            message: 'Transcript analyzed successfully',
+            user: updatedUser
+        });
+
+    } catch (error) {
+        console.error('Transcript analysis error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error processing transcript',
+            error: error.message
+        });
+    }
+});
+
+// Add this to your server.js
+
+// Get profile data endpoint
+app.get('/api/profile/:emplId', (req, res) => {
+    try {
+        const { emplId } = req.params;
+        
+        // Find user by EMPLID
+        const user = users.find(u => u.profile && u.profile.emplId === emplId);
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Return profile data without sensitive information
+        const { password, ...safeUser } = user;
+        
+        res.json({
+            success: true,
+            profile: safeUser.profile
+        });
+
+    } catch (error) {
+        console.error('Error getting profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error getting profile data',
+            error: error.message
+        });
+    }
+});
+
+// Update profile endpoint
+app.put('/api/profile/:emplId', (req, res) => {
+    try {
+        const { emplId } = req.params;
+        const updates = req.body;
+        
+        // Find user by EMPLID
+        const userIndex = users.findIndex(u => u.profile && u.profile.emplId === emplId);
+        
+        if (userIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Update profile
+        users[userIndex].profile = {
+            ...users[userIndex].profile,
+            ...updates,
+            lastUpdated: new Date()
+        };
+
+        // Return updated profile without sensitive information
+        const { password, ...safeUser } = users[userIndex];
+        
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            profile: safeUser.profile
+        });
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile',
+            error: error.message
+        });
+    }
+});
+
+// Updated transcript analysis helper function
+// Update this function in your server.js
+
+function analyzeTranscript(transcriptText) {
+    console.log('Starting transcript analysis');
+
+    const courses = [];
+    let cumulativeGPA = 0;
+    let totalCredits = 0;
+
+    // Split transcript into terms
+    const terms = transcriptText.split(/(?=\d{4}\s(?:Fall|Spring|Summer)\sTerm)/);
+    
+    terms.forEach(term => {
+        if (!term.trim()) return;
+
+        // Extract term name
+        const termMatch = term.match(/(\d{4}\s(?:Fall|Spring|Summer)\sTerm)/);
+        const termName = termMatch ? termMatch[1] : '';
+        
+        console.log('Processing term:', termName);
+
+        // Match course patterns
+        const courseLines = term.split('\n');
+        courseLines.forEach(line => {
+            // Updated regex to match your transcript format more precisely
+            const courseMatch = line.match(/^([A-Z]{2,3}\s\d{3}H?\.?\d*)\s+([\w\s&()-]+?)\s+(\d+\.\d+)\s+([A-Z][+-]?)\s*$/);
+            
+            if (courseMatch) {
+                const courseId = courseMatch[1].trim();
+                const courseName = courseMatch[2].trim();
+                const credits = parseFloat(courseMatch[3]);
+                const grade = courseMatch[4].trim();
+
+                // Only add courses with actual grades and credits
+                if (credits > 0 && grade) {
+                    const course = {
+                        courseId,
+                        courseName,
+                        credits,
+                        grade,
+                        term: termName
+                    };
+
+                    console.log('Found course:', course);
+                    courses.push(course);
+                    
+                    // Update GPA calculation
+                    const gradeValue = calculateGradeValue(grade);
+                    totalCredits += credits;
+                    cumulativeGPA += credits * gradeValue;
+                }
+            }
+        });
+    });
+
+    // Extract major (look for "Computer Science Major" specifically)
+    const majorMatch = transcriptText.match(/Computer Science Major/);
+    const major = majorMatch ? 'Computer Science' : '';
+
+    // Calculate GPA if not found in transcript
+    const calculatedGPA = totalCredits > 0 ? (cumulativeGPA / totalCredits).toFixed(3) : 0;
+    
+    // Extract cumulative GPA from transcript
+    const gpaMatch = transcriptText.match(/Cum GPA:\s*([\d.]+)/);
+    const officialGPA = gpaMatch ? parseFloat(gpaMatch[1]) : parseFloat(calculatedGPA);
+
+    // Extract completed credits
+    const creditsMatch = transcriptText.match(/Cum Total:.*?(\d+\.\d+)/);
+    const completedCredits = creditsMatch ? parseFloat(creditsMatch[1]) : totalCredits;
+
+    const analyzedData = {
+        major,
+        gpa: officialGPA,
+        courses,
+        completedCredits,
+        skills: extractSkills(courses),
+        courseSummary: {
+            totalCourses: courses.length,
+            completedCredits,
+            inProgressCredits: 0
+        },
+        lastUpdated: new Date(),
+        terms: courses.reduce((acc, course) => {
+            if (!acc.includes(course.term)) {
+                acc.push(course.term);
+            }
+            return acc;
+        }, [])
+    };
+
+    console.log('Analyzed Data:', {
+        major: analyzedData.major,
+        gpa: analyzedData.gpa,
+        totalCourses: analyzedData.courses.length,
+        courses: analyzedData.courses.map(c => ({
+            courseId: c.courseId,
+            grade: c.grade,
+            term: c.term
+        })),
+        completedCredits: analyzedData.completedCredits,
+        skills: analyzedData.skills
+    });
+
+    return analyzedData;
+}
+
+function calculateGradeValue(grade) {
+    const gradeValues = {
+        'A': 4.0, 'A-': 3.7,
+        'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+        'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+        'D+': 1.3, 'D': 1.0,
+        'F': 0.0
+    };
+    return gradeValues[grade] || 0;
+}
+
+function extractSkills(courses) {
+    const skills = new Set();
+    
+    courses.forEach(course => {
+        const courseId = course.courseId.trim();
+        
+        // Course-specific skills
+        const courseSkills = {
+            'CSC 101': ['Computer Fundamentals', 'Information Technology', 'Digital Literacy'],
+            'CSC 111': ['Programming Fundamentals', 'Java Programming', 'Software Development'],
+            'CIS 385': ['Web Development', 'HTML/CSS', 'JavaScript'],
+            'MAT 301': ['Calculus', 'Analytical Geometry', 'Advanced Mathematics'],
+            'MAT 206.5': ['Pre-Calculus', 'Algebra', 'Mathematical Reasoning'],
+            'ENG 121': ['Academic Writing', 'Literature Analysis', 'Research Writing'],
+            'CRT 100': ['Critical Thinking', 'Analytical Reasoning', 'Logic'],
+            'SPE 100': ['Public Speaking', 'Oral Communication', 'Presentation Skills'],
+            'ECO 201H': ['Economic Analysis', 'Macroeconomics', 'Research Methods']
+        };
+
+        // Add course-specific skills
+        if (courseSkills[courseId]) {
+            courseSkills[courseId].forEach(skill => skills.add(skill));
+        }
+
+        // Add general skills based on course prefix
+        const prefix = courseId.split(' ')[0];
+        const generalSkills = {
+            'CSC': ['Computer Science', 'Technical Problem Solving'],
+            'CIS': ['Information Systems', 'Technical Documentation'],
+            'MAT': ['Mathematics', 'Analytical Thinking'],
+            'ENG': ['Written Communication', 'Composition'],
+            'SPE': ['Communication', 'Public Speaking'],
+            'CRT': ['Critical Analysis', 'Logical Reasoning'],
+            'ECO': ['Economic Principles', 'Data Analysis']
+        };
+
+        if (generalSkills[prefix]) {
+            generalSkills[prefix].forEach(skill => skills.add(skill));
+        }
+
+        // Add honors designation if applicable
+        if (courseId.includes('H')) {
+            skills.add('Honors Level Work');
+            skills.add('Advanced Academic Research');
+        }
+    });
+
+    return Array.from(skills);
+}
+
+
+
+
+
+
+
 
 // Error handling for undefined routes
 app.use((req, res) => {
