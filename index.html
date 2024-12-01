@@ -66,6 +66,11 @@
             cursor: pointer;
             margin-top: 1rem;
         }
+        .input-hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +102,12 @@
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
                     <input type="email" id="registerEmail" required>
+                    <div class="input-hint">Use your BMCC email (@stu.bmcc.cuny.edu)</div>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmplId">EMPLID</label>
+                    <input type="text" id="registerEmplId" pattern="\d{8}" required>
+                    <div class="input-hint">Your 8-digit BMCC Student ID</div>
                 </div>
                 <div class="form-group">
                     <label for="registerPassword">Password</label>
@@ -141,26 +152,49 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    localStorage.setItem('userId', data.userId);
-                    if (email.endsWith('@admin.bmcc.cuny.edu')) {
-                        window.location.href = 'onboarding-portal.html';
-                    } else {
-                        window.location.href = 'job-landing.html';
+                    // Store user information
+                    localStorage.setItem('userId', data.user.profile.emplId);
+                    localStorage.setItem('userEmail', data.user.email);
+                    localStorage.setItem('userName', data.user.name);
+                    localStorage.setItem('userRole', data.user.role);
+                    
+                    if (data.adminToken) {
+                        localStorage.setItem('adminToken', data.adminToken);
                     }
+                    
+                    window.location.href = data.redirectTo;
                 } else {
-                    messageEl.textContent = data.message;
+                    messageEl.textContent = data.message || 'Invalid credentials';
+                    messageEl.className = 'error';
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 messageEl.textContent = 'An error occurred. Please try again.';
+                messageEl.className = 'error';
             }
         }
-
+        
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
+            const emplId = document.getElementById('registerEmplId').value;
             const password = document.getElementById('registerPassword').value;
             const messageEl = document.getElementById('registerMessage');
+
+            // Validate EMPLID format
+            if (!/^\d{8}$/.test(emplId)) {
+                messageEl.textContent = 'EMPLID must be 8 digits';
+                messageEl.className = 'error';
+                return;
+            }
+
+            // Validate email domain
+            if (!email.endsWith('@stu.bmcc.cuny.edu') && !email.endsWith('@admin.bmcc.cuny.edu')) {
+                messageEl.textContent = 'Please use your BMCC email address';
+                messageEl.className = 'error';
+                return;
+            }
 
             try {
                 const response = await fetch('/api/register', {
@@ -168,7 +202,12 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ name, email, password }),
+                    body: JSON.stringify({ 
+                        name, 
+                        email, 
+                        password,
+                        emplId 
+                    }),
                 });
 
                 const data = await response.json();

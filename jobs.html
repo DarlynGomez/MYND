@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <!-- Jobs Page -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMCC Campus Jobs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #003d82;
+            --secondary-color: #0056b3;
+            --accent-color: #ffd700;
+            --background-color: #f5f7fa;
+            --text-color: #333;
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            min-height: 100vh;
+        }
+
+        .job-card {
+            transition: transform 0.3s ease-in-out;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #eaeaea;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+        }
+
+        .nav-menu {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: #666;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .benefit-card {
+            transition: transform 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="flex">
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+    <div class="sidebar-header p-6 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-800 rounded-lg"></div>
+            <span class="text-lg font-bold text-blue-800">BMCC Jobs</span>
+        </div>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="#" class="nav-item">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <span>Campus Jobs</span>
+        </a>
+    </nav>
+
+    <div class="user-profile p-6 border-t border-gray-200">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-blue-800">
+                J
+            </div>
+            <div>
+                <div class="font-medium">John Doe</div>
+                <div class="text-sm text-gray-500">Student</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Content Area -->
+<main class="main-content">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-blue-800 mb-2">Available Positions</h1>
+        <p class="text-gray-600">Explore current job opportunities on campus</p>
+    </div>
+
+    <!-- Job Cards Grid -->
+    <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <!-- College Assistant Card -->
+        <div class="job-card">
+            <img src="./images/ca.jpg" alt="College Assistant" class="w-full h-48 object-cover">
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-blue-800 mb-2">College Assistant</h3>
+                <p class="text-gray-600 mb-4">Work in various departments while gaining valuable experience.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-blue-600">$15.61/hour</span>
+                    <button onclick="window.location.href='college-assistant.html'" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition">
+                        View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mentor Card -->
+        <div class="job-card">
+            <img src="./images/mentor.jpg" alt="Mentor" class="w-full h-48 object-cover">
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-blue-800 mb-2">Mentor</h3>
+                <p class="text-gray-600 mb-4">Guide and support fellow students in their academic journey.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-blue-600">$16.50/hour</span>
+                    <button onclick="window.location.href='mentor.html'" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition">
+                        View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Instructor Card -->
+        <div class="job-card">
+            <img src="./images/si.jpg" alt="Student Instructor" class="w-full h-48 object-cover">
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-blue-800 mb-2">Student Instructor</h3>
+                <p class="text-gray-600 mb-4">Help other students succeed in their courses.</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-blue-600">$17.00/hour</span>
+                    <button onclick="window.location.href='student-instructor.html'" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition">
+                        View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why Work on Campus Section -->
+    <section class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-2xl font-bold text-blue-800 mb-8 text-center">Why Work on Campus?</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Flexible Schedule -->
+            <div class="benefit-card bg-blue-50 p-6 rounded-lg text-center">
+                <div class="text-4xl mb-4">⏰</div>
+                <h3 class="text-xl font-bold mb-2 text-blue-800">Flexible Schedule</h3>
+                <p class="text-gray-600">Work hours that fit perfectly around your class schedule</p>
+            </div>
+
+            <!-- Gain Experience -->
+            <div class="benefit-card bg-blue-50 p-6 rounded-lg text-center">
+                <div class="text-4xl mb-4">💡</div>
+                <h3 class="text-xl font-bold mb-2 text-blue-800">Gain Experience</h3>
+                <p class="text-gray-600">Develop professional skills for your future career</p>
+            </div>
+
+            <!-- Convenient Location -->
+            <div class="benefit-card bg-blue-50 p-6 rounded-lg text-center">
+                <div class="text-4xl mb-4">🎯</div>
+                <h3 class="text-xl font-bold mb-2 text-blue-800">Convenient Location</h3>
+                <p class="text-gray-600">No commute needed - work right on campus</p>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
