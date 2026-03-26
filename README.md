@@ -8,7 +8,6 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla_JS-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Tailwind](https://img.shields.io/badge/Tailwind-CSS_Styling-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Multer](https://img.shields.io/badge/Multer-File_Uploads-333333?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-In_Development-orange?style=for-the-badge)
 
 **A campus employment platform for BMCC students to find jobs, track onboarding, and get matched to positions based on their academic profile.**
 
