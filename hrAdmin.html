@@ -50,6 +50,50 @@
         }
     </style>
 </head>
+
+<!-- Document Review Modal -->
+<div id="reviewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 flex flex-col" style="max-height: 90vh;">
+        <div class="flex items-center justify-between p-6 border-b">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800" id="modalDocName">Document Review</h2>
+                <p class="text-sm text-gray-500" id="modalStudentName"></p>
+            </div>
+            <button onclick="closeReviewModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+
+        <div class="flex-1 overflow-auto p-6">
+            <div class="bg-gray-100 rounded-lg flex items-center justify-center mb-6" style="min-height: 400px;">
+                <iframe id="docViewer" src="" class="w-full rounded" style="height: 400px; border: none;"></iframe>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Note to Student (optional)</label>
+                <textarea id="reviewNote" rows="3"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Explain why this was approved or denied, or request corrections..."></textarea>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between p-6 border-t bg-gray-50 rounded-b-xl">
+            <button onclick="closeReviewModal()"
+                    class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+                Cancel
+            </button>
+            <div class="flex gap-3">
+                <button onclick="submitReview('rejected')"
+                        class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium">
+                    Deny
+                </button>
+                <button onclick="submitReview('approved')"
+                        class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
+                    Approve
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <body class="bg-gray-50">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
@@ -157,6 +201,61 @@
     </main>
 
     <script>
+        let currentReviewDocId = null;
+
+        function openReviewModal(docId) {
+            const emplId = document.getElementById('studentEmplId').textContent;
+            const doc = currentStudentData.profile.documents.find(d => d.id === docId);
+            if (!doc) return;
+
+            currentReviewDocId = docId;
+            document.getElementById('modalDocName').textContent = doc.name;
+            document.getElementById('modalStudentName').textContent = 
+                `${currentStudentData.name} • ${emplId}`;
+            document.getElementById('reviewNote').value = doc.feedback || '';
+
+            const adminToken = localStorage.getItem('adminToken');
+            document.getElementById('docViewer').src = 
+                `/api/admin/document-file/${emplId}/${docId}?token=${adminToken}`;
+
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+            document.getElementById('docViewer').src = '';
+            currentReviewDocId = null;
+        }
+
+        async function submitReview(status) {
+            const emplId = document.getElementById('studentEmplId').textContent;
+            const feedback = document.getElementById('reviewNote').value.trim();
+
+            try {
+                const response = await fetch('/api/admin/document-status', {
+                    method: 'PUT',
+                    headers: getAdminHeaders(),
+                    body: JSON.stringify({
+                        emplId,
+                        documentId: currentReviewDocId,
+                        status,
+                        feedback
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentStudentData.profile = data.profile;
+                    displayStudentInfo(currentStudentData);
+                    closeReviewModal();
+                } else {
+                    alert(data.message || 'Error updating status');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
         let currentStudentData = null;
     
         // Check if user is admin on page load
@@ -274,11 +373,10 @@
                 container.innerHTML = `
                     <div class="p-4 bg-gray-50 rounded-lg text-center">
                         <p class="text-gray-600">No documents available</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
-    
+
             container.innerHTML = documents.map(doc => `
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div class="flex-1">
@@ -291,18 +389,28 @@
                         <p class="text-sm text-gray-600">
                             ${doc.required ? 'Required' : 'Optional'} • 
                             ${doc.submitInPerson ? 'In-Person Submission' : 'Online Submission'} •
-                            ${doc.submittedDate ? 'Submitted: ' + new Date(doc.submittedDate).toLocaleDateString() : 'Not submitted'}
+                            ${doc.fileInfo ? 'File uploaded' : 'Not submitted'}
                         </p>
+                        ${doc.feedback ? `<p class="text-xs text-red-600 mt-1">Note: ${doc.feedback}</p>` : ''}
                     </div>
-                    <select 
-                        class="ml-4 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        onchange="updateDocumentStatus('${doc.id}', this.value)"
-                        value="${doc.status}">
-                        <option value="pending" ${doc.status === 'pending' ? 'selected' : ''}>Pending</option>
-                        <option value="processing" ${doc.status === 'processing' ? 'selected' : ''}>Processing</option>
-                        <option value="approved" ${doc.status === 'approved' ? 'selected' : ''}>Approved</option>
-                        <option value="rejected" ${doc.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-                    </select>
+                    <div class="flex items-center gap-2 ml-4">
+                        ${doc.fileInfo ? `
+                            <button onclick="openReviewModal('${doc.id}')"
+                                    class="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                                View Document
+                            </button>
+                        ` : `
+                            <span class="text-sm text-gray-400 italic mr-2">No file yet</span>
+                        `}
+                        <select 
+                            class="rounded-md border border-gray-300 text-sm p-1.5 focus:border-blue-500"
+                            onchange="updateDocumentStatus('${doc.id}', this.value)">
+                            <option value="pending" ${doc.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="processing" ${doc.status === 'processing' ? 'selected' : ''}>Processing</option>
+                            <option value="approved" ${doc.status === 'approved' ? 'selected' : ''}>Approved</option>
+                            <option value="rejected" ${doc.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>
+                    </div>
                 </div>
             `).join('');
         }

@@ -97,6 +97,97 @@
             color: white;
         }
 
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .user-profile {
+            position: relative;
+            padding: 1.5rem;
+            border-top: 1px solid #eaeaea;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background-color: var(--background-color);
+        }
+
+        .profile-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .profile-info {
+            flex-grow: 1;
+        }
+
+        .profile-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .profile-role {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .profile-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top: 1px solid #eaeaea;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+            display: none;
+            z-index: 1000;
+        }
+
+        .profile-menu.active {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background-color: var(--background-color);
+        }
+
+        .menu-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .menu-icon {
+            width: 18px;
+            height: 18px;
+        }
+
         .main-content {
             margin-left: var(--sidebar-width);
             flex-grow: 1;
@@ -299,25 +390,16 @@
             gap: 1rem;
             margin-top: 2rem;
         }
+
         .courses-container {
             max-height: 400px;
             overflow-y: auto;
             padding-right: 10px;
         }
 
-        .courses-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .courses-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .courses-container::-webkit-scrollbar-thumb {
-            background: var(--secondary-color);
-            border-radius: 4px;
-        }
+        .courses-container::-webkit-scrollbar { width: 8px; }
+        .courses-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .courses-container::-webkit-scrollbar-thumb { background: var(--secondary-color); border-radius: 4px; }
 
         .courses-grid {
             display: grid;
@@ -338,10 +420,7 @@
             margin-bottom: 0.5rem;
         }
 
-        .course-id {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
+        .course-id { font-weight: bold; color: var(--primary-color); }
 
         .course-grade {
             font-weight: bold;
@@ -350,21 +429,10 @@
             background-color: white;
         }
 
-        .grade-a {
-            color: #28a745;
-        }
-
-        .grade-b {
-            color: #17a2b8;
-        }
-
-        .grade-c {
-            color: #ffc107;
-        }
-
-        .grade-other {
-            color: #dc3545;
-        }
+        .grade-a { color: #28a745; }
+        .grade-b { color: #17a2b8; }
+        .grade-c { color: #ffc107; }
+        .grade-other { color: #dc3545; }
 
         .course-name {
             font-size: 0.9rem;
@@ -389,23 +457,62 @@
         </div>
 
         <nav class="nav-menu">
-            <a href="job-landing.html" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
+            <a href="#" class="nav-item" id="nav-dashboard">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                <span>Available Jobs</span>
+                <span>Dashboard</span>
             </a>
-            <a href="profile.html" class="nav-item active">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
+            <a href="job-landing.html" class="nav-item" id="nav-jobs">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span>Campus Jobs</span>
+            </a>
+            <a href="profile.html" class="nav-item" id="nav-profile">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
                 <span>Profile</span>
             </a>
+            <a href="hronboarding.html" class="nav-item" id="nav-onboarding">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>Onboarding</span>
+            </a>
         </nav>
+
+        <div class="user-profile" onclick="toggleProfileMenu(event)">
+            <div class="profile-content">
+                <div class="profile-pic" id="sidebarInitial">S</div>
+                <div class="profile-info">
+                    <div class="profile-name" id="sidebarName">Student</div>
+                    <div class="profile-role" id="sidebarEmail">Student</div>
+                </div>
+            </div>
+            <div class="profile-menu" id="profileMenu">
+                <a href="profile.html" class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    View Profile
+                </a>
+                <a href="profile.html#settings" class="menu-item">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Settings
+                </a>
+                <a href="#" class="menu-item logout" onclick="handleLogout(event)">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
@@ -431,7 +538,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="emplId">EMPLID (8 digits)</label>
-                            <input type="text" id="emplId" pattern="\d{8}" required>
+                            <input type="text" id="emplId" pattern="\d{8}" readonly style="background:#f5f5f5;cursor:default;">
                         </div>
                         <div class="form-group">
                             <label for="major">Major</label>
@@ -482,6 +589,7 @@
                         </div>
                     </div>
                 </section>
+
                 <!-- Courses -->
                 <section class="profile-section">
                     <h2 class="section-title">Course History</h2>
@@ -497,6 +605,9 @@
                     <button type="button" class="button button-secondary" onclick="resetForm()">Reset</button>
                     <button type="submit" class="button button-primary">Save Profile</button>
                 </div>
+                <div id="saveStatus" class="status-message" style="margin-top:1rem;"></div>
+
+                
             </form>
         </div>
     </main>
@@ -506,9 +617,28 @@
             const userId = localStorage.getItem('userId');
             const userName = localStorage.getItem('userName');
             const userEmail = localStorage.getItem('userEmail');
-            
+
+            // Sidebar population — add these lines
+            document.getElementById('sidebarName').textContent = userName || 'Student';
+            document.getElementById('sidebarEmail').textContent = localStorage.getItem('userRole') || 'Student';
+            document.getElementById('sidebarInitial').textContent = (userName || 'S').charAt(0).toUpperCase();
+
+            // Set active nav item
+            const page = window.location.pathname.split('/').pop();
+            const navMap = {
+                'job-landing.html': 'nav-dashboard',
+                'profile.html': 'nav-profile',
+                'hronboarding.html': 'nav-onboarding',
+                'stuonboarding.html': 'nav-onboarding'
+            };
+            const activeId = navMap[page];
+            if (activeId) {
+                const activeEl = document.getElementById(activeId);
+                if (activeEl) activeEl.classList.add('active');
+            }
+
             console.log('Initial load - User info:', { userId, userName, userEmail });
-    
+
             // Update initial display
             if (userName) {
                 document.getElementById('profileName').textContent = userName;
@@ -634,9 +764,47 @@
             }
         }
     
-        function handleProfileSubmit(event) {
+        async function handleProfileSubmit(event) {
             event.preventDefault();
-            // Add any profile update logic here
+
+            const userId = localStorage.getItem('userId');
+            if (!userId) return;
+
+            const updates = {
+                major: document.getElementById('major').value,
+                gpa: parseFloat(document.getElementById('gpa').value) || 0,
+                expectedGraduation: document.getElementById('expectedGraduation').value,
+                experience: document.getElementById('experience').value,
+            };
+
+            const saveEl = document.getElementById('saveStatus') || document.getElementById('uploadStatus');
+
+            try {
+                saveEl.textContent = 'Saving...';
+                saveEl.className = 'status-message info';
+
+                const response = await fetch(`/api/profile/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    saveEl.textContent = 'Profile saved successfully!';
+                    saveEl.className = 'status-message success';
+                    setTimeout(() => {
+                        saveEl.textContent = '';
+                        saveEl.className = 'status-message';
+                    }, 3000);
+                } else {
+                    saveEl.textContent = data.message || 'Error saving profile';
+                    saveEl.className = 'status-message error';
+                }
+            } catch (error) {
+                saveEl.textContent = 'Error saving profile';
+                saveEl.className = 'status-message error';
+            }
         }
     
         function resetForm() {
@@ -645,6 +813,28 @@
                 document.getElementById('skillsContainer').innerHTML = '';
             }
         }
+
+        function toggleProfileMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('active');
+        }
+
+        function handleLogout(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('profileMenu');
+            const profile = document.querySelector('.user-profile');
+            if (!profile.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>

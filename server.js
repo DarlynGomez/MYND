@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const multer = require('multer');
-const fs = require('fs');
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const multer = require("multer");
+const fs = require("fs");
 const app = express();
 
 // Middleware
@@ -11,18 +11,21 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // Create uploads directory if it doesn't exist
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
 }
 
 // Debug helper
 const debugUsers = () => {
-    console.log('Current users in system:', users.map(u => ({
-        id: u.id,
-        email: u.email,
-        emplId: u.profile?.emplId
-    })));
+  console.log(
+    "Current users in system:",
+    users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      emplId: u.profile?.emplId,
+    }))
+  );
 };
 
 // Initialize Map for admin tokens
@@ -30,701 +33,910 @@ const activeAdminTokens = new Map();
 
 // Define adminAuthMiddleware before using it
 const adminAuthMiddleware = (req, res, next) => {
-    const adminToken = req.headers['admin-token'];
-    console.log('Received admin token:', adminToken);
+  const adminToken = req.headers["admin-token"];
+  console.log("Received admin token:", adminToken);
 
-    if (!adminToken || !activeAdminTokens.has(adminToken)) {
-        console.log('Invalid or missing admin token');
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Unauthorized access' 
-        });
-    }
-    
-    // Add the admin user ID to the request
-    req.adminUserId = activeAdminTokens.get(adminToken);
-    next();
+  if (!adminToken || !activeAdminTokens.has(adminToken)) {
+    console.log("Invalid or missing admin token");
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized access",
+    });
+  }
+
+  // Add the admin user ID to the request
+  req.adminUserId = activeAdminTokens.get(adminToken);
+  next();
 };
 
 // Initialize users array with default admin
-const users = [{
+const users = [
+  {
     id: 1,
-    email: 'admin@admin.bmcc.cuny.edu',
-    password: 'admin123', // In production, use hashed passwords
-    name: 'Admin User',
-    role: 'Admin',
+    email: "admin@admin.bmcc.cuny.edu",
+    password: "admin123", // In production, use hashed passwords
+    name: "Admin User",
+    role: "Admin",
     profile: {
-        emplId: '00000000',
-        documents: [],
-        documentCounts: {
-            completed: 0,
-            pending: 0,
-            processing: 0
-        }
-    }
-}];
+      emplId: "00000000",
+      documents: [],
+      documentCounts: {
+        completed: 0,
+        pending: 0,
+        processing: 0,
+      },
+    },
+  },
+];
 
 // Document template definition
 const documentsTemplate = [
-    {
-        id: 'i9',
-        name: 'I-9 Form',
-        description: 'Employment Eligibility Verification',
-        required: true,
-        status: 'pending',
-        submitInPerson: true,
-        deadline: '3 days before start date'
-    },
-    {
-        id: 'w4',
-        name: 'W-4 Form',
-        description: 'Federal Tax Withholding',
-        required: true,
-        status: 'pending',
-        submitInPerson: false,
-        deadline: 'Before first paycheck'
-    },
-    {
-        id: 'direct-deposit',
-        name: 'Direct Deposit Form',
-        description: 'Banking Information for Payroll',
-        required: true,
-        status: 'pending',
-        submitInPerson: false,
-        deadline: 'Before first paycheck'
-    },
-    {
-        id: 'ssc',
-        name: 'Social Security Card',
-        description: 'Copy of Social Security Card',
-        required: true,
-        status: 'pending',
-        submitInPerson: true,
-        deadline: 'Before first paycheck'
-    },
-    {
-        id: 'id',
-        name: 'Photo ID',
-        description: 'Government-issued Photo ID',
-        required: true,
-        status: 'pending',
-        submitInPerson: true,
-        deadline: 'Before first paycheck'
-    }
+  {
+    id: "i9",
+    name: "I-9 Form",
+    description: "Employment Eligibility Verification",
+    required: true,
+    status: "pending",
+    submitInPerson: true,
+    deadline: "3 days before start date",
+  },
+  {
+    id: "w4",
+    name: "W-4 Form",
+    description: "Federal Tax Withholding",
+    required: true,
+    status: "pending",
+    submitInPerson: false,
+    deadline: "Before first paycheck",
+  },
+  {
+    id: "direct-deposit",
+    name: "Direct Deposit Form",
+    description: "Banking Information for Payroll",
+    required: true,
+    status: "pending",
+    submitInPerson: false,
+    deadline: "Before first paycheck",
+  },
+  {
+    id: "ssc",
+    name: "Social Security Card",
+    description: "Copy of Social Security Card",
+    required: true,
+    status: "pending",
+    submitInPerson: true,
+    deadline: "Before first paycheck",
+  },
+  {
+    id: "id",
+    name: "Photo ID",
+    description: "Government-issued Photo ID",
+    required: true,
+    status: "pending",
+    submitInPerson: true,
+    deadline: "Before first paycheck",
+  },
 ];
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const userDir = path.join(uploadDir, req.body.emplId);
-        if (!fs.existsSync(userDir)){
-            fs.mkdirSync(userDir);
-        }
-        cb(null, userDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `${req.body.documentId}-${uniqueSuffix}${path.extname(file.originalname)}`);
+  destination: function (req, file, cb) {
+    const emplId = req.body.emplId || "temp";
+    const userDir = path.join(uploadDir, emplId);
+    if (!fs.existsSync(userDir)) {
+      fs.mkdirSync(userDir, { recursive: true });
     }
+    cb(null, userDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      `${req.body.documentId || "file"}-${uniqueSuffix}${path.extname(
+        file.originalname
+      )}`
+    );
+  },
 });
 
-const upload = multer({ 
-    storage: storage,
-    fileFilter: function (req, file, cb) {
-        const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
-        const ext = path.extname(file.originalname).toLowerCase();
-        if (allowedTypes.includes(ext)) {
-            cb(null, true);
-        } else {
-            cb(new Error('Invalid file type. Only PDF, DOC, DOCX, and image files are allowed.'));
-        }
-    },
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Invalid file type. Only PDF, DOC, DOCX, and image files are allowed."
+        )
+      );
     }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
 
 // Document upload endpoint
-app.post('/api/upload-document', upload.single('file'), (req, res) => {
-    try {
-        const { emplId, documentId } = req.body;
-        console.log(`Processing document upload for EMPLID ${emplId}, document ${documentId}`);
+app.post("/api/upload-document", upload.single("file"), (req, res) => {
+  try {
+    const { emplId, documentId } = req.body;
+    console.log(
+      `Processing document upload for EMPLID ${emplId}, document ${documentId}`
+    );
 
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'No file uploaded'
-            });
-        }
-
-        // Find user and update document status
-        const userIndex = users.findIndex(u => 
-            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
-        );
-
-        if (userIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        // Find the document and update its status
-        const docIndex = users[userIndex].profile.documents.findIndex(
-            doc => doc.id === documentId
-        );
-
-        if (docIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Document not found'
-            });
-        }
-
-        // Update document status and add file information
-        users[userIndex].profile.documents[docIndex] = {
-            ...users[userIndex].profile.documents[docIndex],
-            status: 'processing',
-            fileInfo: {
-                path: req.file.path,
-                originalName: req.file.originalname,
-                uploadDate: new Date()
-            }
-        };
-
-        // Update document counts
-        const documents = users[userIndex].profile.documents;
-        users[userIndex].profile.documentCounts = {
-            completed: documents.filter(d => d.status === 'approved').length,
-            pending: documents.filter(d => d.status === 'pending').length,
-            processing: documents.filter(d => d.status === 'processing').length
-        };
-
-        console.log('Document uploaded successfully:', {
-            emplId,
-            documentId,
-            status: 'processing',
-            file: req.file.filename
-        });
-
-        res.json({
-            success: true,
-            message: 'Document uploaded successfully',
-            profile: users[userIndex].profile
-        });
-
-    } catch (error) {
-        console.error('Error uploading document:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
     }
+
+    // Find user and update document status
+    const userIndex = users.findIndex(
+      (u) =>
+        u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+    );
+
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Find the document and update its status
+    const docIndex = users[userIndex].profile.documents.findIndex(
+      (doc) => doc.id === documentId
+    );
+
+    if (docIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
+    }
+
+    // Update document status and add file information
+    users[userIndex].profile.documents[docIndex] = {
+      ...users[userIndex].profile.documents[docIndex],
+      status: "processing",
+      fileInfo: {
+        path: req.file.path,
+        originalName: req.file.originalname,
+        uploadDate: new Date(),
+      },
+    };
+
+    // Update document counts
+    const documents = users[userIndex].profile.documents;
+    users[userIndex].profile.documentCounts = {
+      completed: documents.filter((d) => d.status === "approved").length,
+      pending: documents.filter((d) => d.status === "pending").length,
+      processing: documents.filter((d) => d.status === "processing").length,
+    };
+
+    console.log("Document uploaded successfully:", {
+      emplId,
+      documentId,
+      status: "processing",
+      file: req.file.filename,
+    });
+
+    res.json({
+      success: true,
+      message: "Document uploaded successfully",
+      profile: users[userIndex].profile,
+    });
+  } catch (error) {
+    console.error("Error uploading document:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 });
 
 // Serve uploaded files (with basic security check)
-app.get('/uploads/:emplId/:file', adminAuthMiddleware, (req, res) => {
-    const filePath = path.join(uploadDir, req.params.emplId, req.params.file);
-    res.sendFile(filePath);
+app.get("/uploads/:emplId/:file", adminAuthMiddleware, (req, res) => {
+  const filePath = path.join(uploadDir, req.params.emplId, req.params.file);
+  res.sendFile(filePath);
+});
+
+// Get uploaded file for admin review
+app.get("/api/admin/document-file/:emplId/:docId", (req, res) => {
+  const adminToken = req.headers["admin-token"] || req.query.token;
+  if (!adminToken || !activeAdminTokens.has(adminToken)) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const { emplId, docId } = req.params;
+  const user = findUserByEmplId(emplId);
+  if (!user)
+    return res.status(404).json({ success: false, message: "User not found" });
+
+  const doc = user.profile.documents.find((d) => d.id === docId);
+  if (!doc || !doc.fileInfo)
+    return res
+      .status(404)
+      .json({ success: false, message: "No file found for this document" });
+
+  const filePath = doc.fileInfo.path;
+  if (!fs.existsSync(filePath))
+    return res
+      .status(404)
+      .json({ success: false, message: "File not found on disk" });
+
+  res.sendFile(filePath);
 });
 
 // Admin document review endpoint
-app.put('/api/admin/document-status', adminAuthMiddleware, (req, res) => {
-    try {
-        const { emplId, documentId, status, feedback } = req.body;
-        console.log(`Updating document status: EMPLID ${emplId}, document ${documentId}, status ${status}`);
+app.put("/api/admin/document-status", adminAuthMiddleware, (req, res) => {
+  try {
+    const { emplId, documentId, status, feedback } = req.body;
+    console.log(
+      `Updating document status: EMPLID ${emplId}, document ${documentId}, status ${status}`
+    );
 
-        const userIndex = users.findIndex(u => 
-            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
-        );
+    const userIndex = users.findIndex(
+      (u) =>
+        u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+    );
 
-        if (userIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        const docIndex = users[userIndex].profile.documents.findIndex(
-            doc => doc.id === documentId
-        );
-
-        if (docIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Document not found'
-            });
-        }
-
-        // Update document status
-        users[userIndex].profile.documents[docIndex] = {
-            ...users[userIndex].profile.documents[docIndex],
-            status,
-            feedback,
-            reviewDate: new Date()
-        };
-
-        // Update document counts
-        const documents = users[userIndex].profile.documents;
-        users[userIndex].profile.documentCounts = {
-            completed: documents.filter(d => d.status === 'approved').length,
-            pending: documents.filter(d => d.status === 'pending').length,
-            processing: documents.filter(d => d.status === 'processing').length
-        };
-
-        console.log('Document status updated:', {
-            emplId,
-            documentId,
-            status,
-            newCounts: users[userIndex].profile.documentCounts
-        });
-
-        res.json({
-            success: true,
-            message: 'Document status updated',
-            profile: users[userIndex].profile
-        });
-
-    } catch (error) {
-        console.error('Error updating document status:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-});
 
+    const docIndex = users[userIndex].profile.documents.findIndex(
+      (doc) => doc.id === documentId
+    );
+
+    if (docIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
+    }
+
+    // Update document status
+    users[userIndex].profile.documents[docIndex] = {
+      ...users[userIndex].profile.documents[docIndex],
+      status,
+      feedback,
+      reviewDate: new Date(),
+    };
+
+    // Update document counts
+    const documents = users[userIndex].profile.documents;
+    users[userIndex].profile.documentCounts = {
+      completed: documents.filter((d) => d.status === "approved").length,
+      pending: documents.filter((d) => d.status === "pending").length,
+      processing: documents.filter((d) => d.status === "processing").length,
+    };
+
+    console.log("Document status updated:", {
+      emplId,
+      documentId,
+      status,
+      newCounts: users[userIndex].profile.documentCounts,
+    });
+
+    res.json({
+      success: true,
+      message: "Document status updated",
+      profile: users[userIndex].profile,
+    });
+  } catch (error) {
+    console.error("Error updating document status:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 
 // Serve HTML files
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get('/job-landing.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'job-landing.html'));
+app.get("/job-landing.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "job-landing.html"));
 });
 
-app.get('/hrAdmin.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'hrAdmin.html'));
+app.get("/hrAdmin.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "hrAdmin.html"));
 });
 
 // Login endpoint
-app.post('/api/login', (req, res) => {
-    try {
-        console.log('Login attempt:', req.body);
-        const { email, password } = req.body;
+app.post("/api/login", (req, res) => {
+  try {
+    console.log("Login attempt:", req.body);
+    const { email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email and password are required'
-            });
-        }
-
-        const user = users.find(u => u.email === email);
-        console.log('Found user:', user);
-        
-        if (!user || user.password !== password) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid credentials'
-            });
-        }
-
-        const isAdmin = email.endsWith('@admin.bmcc.cuny.edu');
-        const userRole = isAdmin ? 'Admin' : 'Student';
-        const redirectTo = isAdmin ? '/hrAdmin.html' : '/job-landing.html';
-        
-        // Generate admin token if admin
-        const adminToken = isAdmin ? `admin-${Date.now()}-${Math.random().toString(36).substring(2, 15)}` : null;
-
-        // Store token if admin
-        if (isAdmin) {
-            activeAdminTokens.set(adminToken, user.id);
-        }
-
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
-        
-        console.log('Sending login response:', {
-            success: true,
-            user: {
-                ...userWithoutPassword,
-                role: userRole
-            },
-            adminToken,
-            redirectTo
-        });
-
-        res.json({
-            success: true,
-            user: {
-                ...userWithoutPassword,
-                role: userRole
-            },
-            adminToken,
-            redirectTo
-        });
-
-        const responseData = {
-            success: true,
-            user: {
-                ...userWithoutPassword,
-                role: userRole,
-                emplId: user.profile.emplId  // Make sure EMPLID is included
-            },
-            adminToken,
-            redirectTo
-        };
-
-        console.log('Sending login response with EMPLID:', responseData);
-        res.json(responseData);
-
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred during login',
-            error: error.message
-        });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
     }
+
+    const user = users.find((u) => u.email === email);
+    console.log("Found user:", user);
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const isAdmin = email.endsWith("@admin.bmcc.cuny.edu");
+    const userRole = isAdmin ? "Admin" : "Student";
+    const redirectTo = isAdmin ? "/hrAdmin.html" : "/job-landing.html";
+
+    // Generate admin token if admin
+    const adminToken = isAdmin
+      ? `admin-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
+      : null;
+
+    // Store token if admin
+    if (isAdmin) {
+      activeAdminTokens.set(adminToken, user.id);
+    }
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    console.log("Sending login response:", {
+      success: true,
+      user: {
+        ...userWithoutPassword,
+        role: userRole,
+      },
+      adminToken,
+      redirectTo,
+    });
+
+    const responseData = {
+      success: true,
+      user: {
+        ...userWithoutPassword,
+        role: userRole,
+        emplId: user.profile.emplId,
+      },
+      adminToken,
+      redirectTo,
+    };
+
+    console.log("Sending login response with EMPLID:", responseData);
+    return res.json(responseData);
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred during login",
+      error: error.message,
+    });
+  }
 });
 
-app.get('/hronboarding.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'hronboarding.html'));
+app.get("/hronboarding.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "hronboarding.html"));
 });
 
 // Registration endpoint
-app.post('/api/register', (req, res) => {
-    try {
-        const { email, password, name, emplId } = req.body;
+app.post("/api/register", (req, res) => {
+  try {
+    const { email, password, name, emplId } = req.body;
 
-        if (!email || !password || !name || !emplId) {
-            return res.status(400).json({
-                success: false,
-                message: 'All fields are required'
-            });
-        }
-
-        if (!/^\d{8}$/.test(emplId)) {
-            return res.status(400).json({
-                success: false,
-                message: 'EMPLID must be 8 digits'
-            });
-        }
-
-        const existingUser = users.find(user => 
-            user.email === email || 
-            (user.profile && user.profile.emplId === emplId)
-        );
-        
-        if (existingUser) {
-            return res.status(400).json({ 
-                success: false, 
-                message: existingUser.email === email ? 
-                    'Email already registered' : 'EMPLID already registered' 
-            });
-        }
-
-        if (!email.endsWith('@stu.bmcc.cuny.edu')) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Please use your BMCC student email address' 
-            });
-        }
-
-        const newUser = {
-            id: users.length + 1,
-            email,
-            password,
-            name,
-            role: 'Student',
-            profile: {
-                emplId,
-                onboardingStatus: 'not-started',
-                documents: [],
-                documentCounts: {
-                    completed: 0,
-                    pending: 0,
-                    processing: 0
-                },
-                createdAt: new Date(),
-                isProfileComplete: false
-            }
-        };
-
-        users.push(newUser);
-        debugUsers();
-        console.log('New user registered:', {
-            id: newUser.id,
-            email: newUser.email,
-            emplId: newUser.profile.emplId
-        });
-
-        const { password: _, ...userWithoutPassword } = newUser;
-        res.status(200).json({ 
-            success: true, 
-            message: 'Registration successful',
-            user: userWithoutPassword
-        });
-
-    } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred during registration',
-            error: error.message
-        });
+    if (!email || !password || !name || !emplId) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
+
+    if (!/^\d{8}$/.test(emplId)) {
+      return res.status(400).json({
+        success: false,
+        message: "EMPLID must be 8 digits",
+      });
+    }
+
+    const existingUser = users.find(
+      (user) =>
+        user.email === email || (user.profile && user.profile.emplId === emplId)
+    );
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message:
+          existingUser.email === email
+            ? "Email already registered"
+            : "EMPLID already registered",
+      });
+    }
+
+    if (!email.endsWith("@stu.bmcc.cuny.edu")) {
+      return res.status(400).json({
+        success: false,
+        message: "Please use your BMCC student email address",
+      });
+    }
+
+    const newUser = {
+      id: users.length + 1,
+      email,
+      password,
+      name,
+      role: "Student",
+      profile: {
+        emplId,
+        onboardingStatus: "not-started",
+        documents: [],
+        documentCounts: {
+          completed: 0,
+          pending: 0,
+          processing: 0,
+        },
+        createdAt: new Date(),
+        isProfileComplete: false,
+      },
+    };
+
+    users.push(newUser);
+    debugUsers();
+    console.log("New user registered:", {
+      id: newUser.id,
+      email: newUser.email,
+      emplId: newUser.profile.emplId,
+    });
+
+    const { password: _, ...userWithoutPassword } = newUser;
+    res.status(200).json({
+      success: true,
+      message: "Registration successful",
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred during registration",
+      error: error.message,
+    });
+  }
 });
 
 // Admin endpoint to search user by EMPLID
 
 const findUserByEmplId = (emplId) => {
-    // Convert to string and trim any whitespace
-    const searchEmplId = String(emplId).trim();
-    return users.find(u => u.profile && String(u.profile.emplId).trim() === searchEmplId);
+  // Convert to string and trim any whitespace
+  const searchEmplId = String(emplId).trim();
+  return users.find(
+    (u) => u.profile && String(u.profile.emplId).trim() === searchEmplId
+  );
 };
 
-app.get('/api/admin/user/:emplId', adminAuthMiddleware, (req, res) => {
-    try {
-        const { emplId } = req.params;
-        const user = findUserByEmplId(emplId);
+app.get("/api/admin/user/:emplId", adminAuthMiddleware, (req, res) => {
+  try {
+    const { emplId } = req.params;
+    const user = findUserByEmplId(emplId);
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'No user found with this EMPLID'
-            });
-        }
-
-        const { password, ...safeUserData } = user;
-        res.json({
-            success: true,
-            user: safeUserData
-        });
-    } catch (error) {
-        console.error('Admin search error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error searching for user',
-            error: error.message
-        });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No user found with this EMPLID",
+      });
     }
+
+    const { password, ...safeUserData } = user;
+    res.json({
+      success: true,
+      user: safeUserData,
+    });
+  } catch (error) {
+    console.error("Admin search error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error searching for user",
+      error: error.message,
+    });
+  }
 });
 
 // Update onboarding status
 // Update onboarding status
-app.put('/api/admin/onboarding-status', adminAuthMiddleware, (req, res) => {
-    try {
-        const { emplId, status } = req.body;
-        console.log(`Updating onboarding status for EMPLID ${emplId} to ${status}`); // Debug log
-        
-        const userIndex = users.findIndex(u => 
-            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
-        );
+app.put("/api/admin/onboarding-status", adminAuthMiddleware, (req, res) => {
+  try {
+    const { emplId, status } = req.body;
+    console.log(`Updating onboarding status for EMPLID ${emplId} to ${status}`); // Debug log
 
-        if (userIndex === -1) {
-            console.log('Student not found with EMPLID:', emplId); // Debug log
-            return res.status(404).json({
-                success: false,
-                message: 'Student not found'
-            });
-        }
+    const userIndex = users.findIndex(
+      (u) =>
+        u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+    );
 
-        // Update onboarding status
-        users[userIndex].profile.onboardingStatus = status;
-
-        // If status is changed to 'in-progress', initialize documents
-        if (status === 'in-progress') {
-            console.log('Initializing documents for student'); // Debug log
-            
-            // Create fresh copy of document template
-            users[userIndex].profile.documents = documentsTemplate.map(doc => ({...doc}));
-            
-            // Initialize document counts
-            users[userIndex].profile.documentCounts = {
-                completed: 0,
-                pending: documentsTemplate.length,
-                processing: 0
-            };
-
-            console.log('Updated user profile:', users[userIndex].profile); // Debug log
-        }
-
-        // Return updated profile
-        res.json({
-            success: true,
-            message: 'Onboarding status updated',
-            profile: users[userIndex].profile
-        });
-
-    } catch (error) {
-        console.error('Error updating onboarding status:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error updating onboarding status',
-            error: error.message
-        });
+    if (userIndex === -1) {
+      console.log("Student not found with EMPLID:", emplId); // Debug log
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
     }
+
+    // Update onboarding status
+    users[userIndex].profile.onboardingStatus = status;
+
+    // If status is changed to 'in-progress', initialize documents
+    if (status === "in-progress") {
+      console.log("Initializing documents for student"); // Debug log
+
+      // Create fresh copy of document template
+      users[userIndex].profile.documents = documentsTemplate.map((doc) => ({
+        ...doc,
+      }));
+
+      // Initialize document counts
+      users[userIndex].profile.documentCounts = {
+        completed: 0,
+        pending: documentsTemplate.length,
+        processing: 0,
+      };
+
+      console.log("Updated user profile:", users[userIndex].profile); // Debug log
+    }
+
+    // Return updated profile
+    res.json({
+      success: true,
+      message: "Onboarding status updated",
+      profile: users[userIndex].profile,
+    });
+  } catch (error) {
+    console.error("Error updating onboarding status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating onboarding status",
+      error: error.message,
+    });
+  }
 });
 
 // Update document status
-app.get('/api/document-status/:emplId', (req, res) => {
-    try {
-        const { emplId } = req.params;
-        console.log(`[GET /api/document-status] Requested EMPLID:`, emplId);
-        
-        const user = users.find(u => 
-            u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
-        );
-        
-        console.log(`[GET /api/document-status] Found user:`, user);
-        
-        if (!user) {
-            console.log(`[GET /api/document-status] No user found for EMPLID:`, emplId);
-            return res.status(404).json({
-                success: false,
-                message: 'Student not found'
-            });
-        }
+app.get("/api/document-status/:emplId", (req, res) => {
+  try {
+    const { emplId } = req.params;
+    console.log(`[GET /api/document-status] Requested EMPLID:`, emplId);
 
-        const response = {
-            success: true,
-            onboardingStatus: user.profile.onboardingStatus || 'not-started',
-            documents: user.profile.documents || [],
-            documentCounts: user.profile.documentCounts || {
-                completed: 0,
-                pending: 0,
-                processing: 0
-            }
-        };
+    const user = users.find(
+      (u) =>
+        u.profile && String(u.profile.emplId).trim() === String(emplId).trim()
+    );
 
-        console.log(`[GET /api/document-status] Sending response:`, response);
-        res.json(response);
+    console.log(`[GET /api/document-status] Found user:`, user);
 
-    } catch (error) {
-        console.error('[GET /api/document-status] Error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error getting document status',
-            error: error.message
-        });
+    if (!user) {
+      console.log(
+        `[GET /api/document-status] No user found for EMPLID:`,
+        emplId
+      );
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
     }
+
+    const response = {
+      success: true,
+      onboardingStatus: user.profile.onboardingStatus || "not-started",
+      documents: user.profile.documents || [],
+      documentCounts: user.profile.documentCounts || {
+        completed: 0,
+        pending: 0,
+        processing: 0,
+      },
+    };
+
+    console.log(`[GET /api/document-status] Sending response:`, response);
+    res.json(response);
+  } catch (error) {
+    console.error("[GET /api/document-status] Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting document status",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/api/recommendations/:emplId", (req, res) => {
+  const { emplId } = req.params;
+  let user = findUserByEmplId(emplId);
+  if (!user) user = users.find((u) => String(u.id) === String(emplId));
+
+  const allJobs = [
+    {
+      id: "impact-mentor",
+      title: "Freshman IMPACT Mentor",
+      description:
+        "Help new students transition to college life during their first year.",
+      wage: "$16.50",
+      hoursPerWeek: "10-15",
+      department: "Student Affairs",
+      image: "./images/mentor.jpg",
+      requiredSkills: [
+        "Leadership",
+        "Communication",
+        "Public Speaking",
+        "Critical Thinking",
+      ],
+      matchTags: ["GPA 3.0+"],
+    },
+    {
+      id: "firstgen-mentor",
+      title: "First-Gen Mentor",
+      description:
+        "Support first-generation college students through their journey.",
+      wage: "$16.50",
+      hoursPerWeek: "12-15",
+      department: "Student Affairs",
+      image: "./images/mentor.jpg",
+      requiredSkills: [
+        "Empathy",
+        "Communication",
+        "Written Communication",
+        "Analytical Reasoning",
+      ],
+      matchTags: ["Any Major"],
+    },
+    {
+      id: "peer-success-mentor",
+      title: "Peer Success Mentor",
+      description:
+        "Guide students toward academic success and campus resources.",
+      wage: "$16.00",
+      hoursPerWeek: "10-15",
+      department: "Academic Affairs",
+      image: "./images/mentor.jpg",
+      requiredSkills: [
+        "Communication",
+        "Critical Analysis",
+        "Organization",
+        "Logic",
+      ],
+      matchTags: ["Any Major"],
+    },
+    {
+      id: "career-mentor",
+      title: "Career Mentor",
+      description:
+        "Help students with career planning, resumes, and interviews.",
+      wage: "$16.50",
+      hoursPerWeek: "10-12",
+      department: "Career Services",
+      image: "./images/mentor.jpg",
+      requiredSkills: [
+        "Communication",
+        "Research Methods",
+        "Data Analysis",
+        "Written Communication",
+      ],
+      matchTags: ["Any Major", "GPA 3.0+"],
+    },
+    {
+      id: "umla-mentor",
+      title: "UMLA Mentor",
+      description: "Provide academic support in math and science subjects.",
+      wage: "$16.50",
+      hoursPerWeek: "10-12",
+      department: "Academic Affairs",
+      image: "./images/mentor.jpg",
+      requiredSkills: [
+        "Mathematics",
+        "Calculus",
+        "Analytical Thinking",
+        "Advanced Mathematics",
+      ],
+      matchTags: ["Computer Science", "Engineering", "GPA 3.0+"],
+    },
+  ];
+
+  const userSkills = user?.profile?.skills || [];
+  const userMajor = user?.profile?.major || "";
+  const userGpa = parseFloat(user?.profile?.gpa) || 0;
+
+  const scored = allJobs.map((job) => {
+    let score = 20;
+    let matchDetails = [];
+
+    job.requiredSkills.forEach((skill) => {
+      if (
+        userSkills.some(
+          (s) =>
+            s.toLowerCase().includes(skill.toLowerCase()) ||
+            skill.toLowerCase().includes(s.toLowerCase())
+        )
+      ) {
+        score += 12;
+        if (matchDetails.length < 3)
+          matchDetails.push(`Your skill in ${skill} is a great fit`);
+      }
+    });
+
+    if (job.matchTags.includes(userMajor)) {
+      score += 20;
+      matchDetails.push(`Matches your ${userMajor} major`);
+    }
+
+    if (job.matchTags.includes("GPA 3.0+") && userGpa >= 3.0) {
+      score += 10;
+      matchDetails.push(`Your GPA of ${userGpa} meets the requirement`);
+    }
+
+    if (job.matchTags.includes("Any Major")) {
+      score += 8;
+      if (matchDetails.length === 0) matchDetails.push("Open to all majors");
+    }
+
+    if (matchDetails.length === 0)
+      matchDetails.push("Good entry-level opportunity");
+
+    return {
+      ...job,
+      matchScore: Math.min(score, 99),
+      matchDetails: matchDetails.slice(0, 3),
+    };
+  });
+
+  // Sort by score and return top 3
+  const top3 = scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, 3);
+  res.json(top3);
 });
 
 // Document submission endpoint
-app.post('/api/submit-document', upload.single('document'), (req, res) => {
-    try {
-        const { emplId, documentId } = req.body;
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'No file uploaded'
-            });
-        }
-
-        const userIndex = users.findIndex(u => u.profile.emplId === emplId);
-        if (userIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Student not found'
-            });
-        }
-
-        if (!users[userIndex].profile.documents) {
-            users[userIndex].profile.documents = documentsTemplate.map(doc => ({...doc}));
-        }
-
-        const docIndex = users[userIndex].profile.documents.findIndex(d => d.id === documentId);
-        if (docIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Document type not found'
-            });
-        }
-
-        // Update document status to processing
-        users[userIndex].profile.documents[docIndex] = {
-            ...users[userIndex].profile.documents[docIndex],
-            status: 'processing',
-            submittedDate: new Date(),
-            fileName: req.file.originalname
-        };
-
-        // Update document counts
-        const docs = users[userIndex].profile.documents;
-        users[userIndex].profile.documentCounts = {
-            completed: docs.filter(d => d.status === 'approved').length,
-            pending: docs.filter(d => d.status === 'pending').length,
-            processing: docs.filter(d => d.status === 'processing').length
-        };
-
-        res.json({
-            success: true,
-            message: 'Document submitted successfully',
-            profile: users[userIndex].profile
-        });
-
-    } catch (error) {
-        console.error('Error submitting document:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error submitting document',
-            error: error.message
-        });
+app.post("/api/submit-document", upload.single("document"), (req, res) => {
+  try {
+    const { emplId, documentId } = req.body;
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
     }
+
+    const userIndex = users.findIndex((u) => u.profile.emplId === emplId);
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    if (!users[userIndex].profile.documents) {
+      users[userIndex].profile.documents = documentsTemplate.map((doc) => ({
+        ...doc,
+      }));
+    }
+
+    const docIndex = users[userIndex].profile.documents.findIndex(
+      (d) => d.id === documentId
+    );
+    if (docIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Document type not found",
+      });
+    }
+
+    // Update document status to processing
+    users[userIndex].profile.documents[docIndex] = {
+      ...users[userIndex].profile.documents[docIndex],
+      status: "processing",
+      submittedDate: new Date(),
+      fileName: req.file.originalname,
+    };
+
+    // Update document counts
+    const docs = users[userIndex].profile.documents;
+    users[userIndex].profile.documentCounts = {
+      completed: docs.filter((d) => d.status === "approved").length,
+      pending: docs.filter((d) => d.status === "pending").length,
+      processing: docs.filter((d) => d.status === "processing").length,
+    };
+
+    res.json({
+      success: true,
+      message: "Document submitted successfully",
+      profile: users[userIndex].profile,
+    });
+  } catch (error) {
+    console.error("Error submitting document:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error submitting document",
+      error: error.message,
+    });
+  }
 });
 
 // Get document status
-app.get('/api/document-status/:emplId', (req, res) => {
-    try {
-        const { emplId } = req.params;
-        const user = users.find(u => u.profile.emplId === emplId);
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'Student not found'
-            });
-        }
+app.get("/api/document-status/:emplId", (req, res) => {
+  try {
+    const { emplId } = req.params;
+    const user = users.find((u) => u.profile.emplId === emplId);
 
-        res.json({
-            success: true,
-            documents: user.profile.documents || [],
-            documentCounts: user.profile.documentCounts,
-            onboardingStatus: user.profile.onboardingStatus
-        });
-
-    } catch (error) {
-        console.error('Error getting document status:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error getting document status',
-            error: error.message
-        });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
     }
+
+    res.json({
+      success: true,
+      documents: user.profile.documents || [],
+      documentCounts: user.profile.documentCounts,
+      onboardingStatus: user.profile.onboardingStatus,
+    });
+  } catch (error) {
+    console.error("Error getting document status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting document status",
+      error: error.message,
+    });
+  }
 });
 
-app.post('/api/upload-transcript', upload.single('transcript'), async (req, res) => {
+const transcriptStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const emplId = req.body.emplId || "temp";
+    const userDir = path.join(uploadDir, emplId, "transcripts");
+    if (!fs.existsSync(userDir)) {
+      fs.mkdirSync(userDir, { recursive: true });
+    }
+    cb(null, userDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `transcript-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
+});
+
+const uploadTranscript = multer({ storage: transcriptStorage });
+
+app.post(
+  "/api/upload-transcript",
+  uploadTranscript.single("transcript"),
+  async (req, res) => {
     try {
-        const userEmplId = req.body.emplId;
-        console.log('Processing transcript for EMPLID:', userEmplId);
+      const userEmplId = req.body.emplId;
+      console.log("Processing transcript for EMPLID:", userEmplId);
 
-        // Find user
-        const userIndex = users.findIndex(u => 
-            u.profile && String(u.profile.emplId).trim() === String(userEmplId).trim()
-        );
+      // Find user
+      const userIndex = users.findIndex(
+        (u) =>
+          u.profile &&
+          String(u.profile.emplId).trim() === String(userEmplId).trim()
+      );
 
-        if (userIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: `No user found with EMPLID: ${userEmplId}`
-            });
-        }
+      if (userIndex === -1) {
+        return res.status(404).json({
+          success: false,
+          message: `No user found with EMPLID: ${userEmplId}`,
+        });
+      }
 
-        // Use the actual transcript text from your document
-        const transcriptText = `2023 Fall Term
+      // Use the actual transcript text from your document
+      const transcriptText = `2023 Fall Term
         Computer Science Major
         Academic Standing Effective 01/02/2024: Good Academic Standing
         Course Description Earn Grd
@@ -759,301 +971,322 @@ app.post('/api/upload-transcript', upload.single('transcript'), async (req, res)
         ECO 201H Macroeconomics (Honors) 3.00 A
         Req Designation: Flexible Core - US Experience in its Diversity`;
 
-        // Analyze transcript
-        const analyzedData = analyzeTranscript(transcriptText);
-        console.log('Analyzed transcript data:', analyzedData);
+      // Analyze transcript
+      const analyzedData = analyzeTranscript(transcriptText);
+      console.log("Analyzed transcript data:", analyzedData);
 
-        // Update user profile
-        users[userIndex].profile = {
-            ...users[userIndex].profile,
-            ...analyzedData,
-            transcriptUploaded: true,
-            lastTranscriptUpload: new Date()
-        };
+      // Update user profile
+      users[userIndex].profile = {
+        ...users[userIndex].profile,
+        ...analyzedData,
+        transcriptUploaded: true,
+        lastTranscriptUpload: new Date(),
+      };
 
-        // Return updated profile
-        const { password: _, ...updatedUser } = users[userIndex];
-        
-        console.log('Profile updated with transcript data:', updatedUser.profile);
+      // Return updated profile
+      const { password: _, ...updatedUser } = users[userIndex];
 
-        res.json({
-            success: true,
-            message: 'Transcript analyzed successfully',
-            user: updatedUser
-        });
+      console.log("Profile updated with transcript data:", updatedUser.profile);
 
+      res.json({
+        success: true,
+        message: "Transcript analyzed successfully",
+        user: updatedUser,
+      });
     } catch (error) {
-        console.error('Transcript analysis error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error processing transcript',
-            error: error.message
-        });
+      console.error("Transcript analysis error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error processing transcript",
+        error: error.message,
+      });
     }
-});
-
+  }
+);
 
 // Add this to your server.js
 
 // Get profile data endpoint
-app.get('/api/profile/:emplId', (req, res) => {
-    try {
-        const { emplId } = req.params;
-        const user = findUserByEmplId(emplId);
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
+app.get("/api/profile/:emplId", (req, res) => {
+  try {
+    const { emplId } = req.params;
+    const user = findUserByEmplId(emplId);
 
-        const { password, ...safeUser } = user;
-        
-        res.json({
-            success: true,
-            profile: safeUser.profile
-        });
-    } catch (error) {
-        console.error('Error getting profile:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error getting profile data',
-            error: error.message
-        });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+
+    const { password, ...safeUser } = user;
+
+    res.json({
+      success: true,
+      profile: safeUser.profile,
+    });
+  } catch (error) {
+    console.error("Error getting profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error getting profile data",
+      error: error.message,
+    });
+  }
 });
 
 // Update profile endpoint
-app.put('/api/profile/:emplId', (req, res) => {
-    try {
-        const { emplId } = req.params;
-        const updates = req.body;
-        
-        // Find user by EMPLID
-        const userIndex = users.findIndex(u => u.profile && u.profile.emplId === emplId);
-        
-        if (userIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
+app.put("/api/profile/:emplId", (req, res) => {
+  try {
+    const { emplId } = req.params;
+    const updates = req.body;
 
-        // Update profile
-        users[userIndex].profile = {
-            ...users[userIndex].profile,
-            ...updates,
-            lastUpdated: new Date()
-        };
+    // Find user by EMPLID
+    const userIndex = users.findIndex(
+      (u) => u.profile && u.profile.emplId === emplId
+    );
 
-        // Return updated profile without sensitive information
-        const { password, ...safeUser } = users[userIndex];
-        
-        res.json({
-            success: true,
-            message: 'Profile updated successfully',
-            profile: safeUser.profile
-        });
-
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error updating profile',
-            error: error.message
-        });
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+
+    // Update profile
+    users[userIndex].profile = {
+      ...users[userIndex].profile,
+      ...updates,
+      lastUpdated: new Date(),
+    };
+
+    // Return updated profile without sensitive information
+    const { password, ...safeUser } = users[userIndex];
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      profile: safeUser.profile,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating profile",
+      error: error.message,
+    });
+  }
 });
 
 // Updated transcript analysis helper function
 // Update this function in your server.js
 
 function analyzeTranscript(transcriptText) {
-    console.log('Starting transcript analysis');
-    
-    const courses = [];
-    let cumulativeGPA = 0;
-    let totalCredits = 0;
-    let earnedCredits = 0;
-    let major = '';
+  console.log("Starting transcript analysis");
 
-    // Split transcript into terms and clean up whitespace
-    const terms = transcriptText.split(/(?=\d{4}\s(?:Fall|Spring|Summer)\sTerm)/)
-        .map(term => term.trim());
-    
-    terms.forEach(term => {
-        if (!term) return;
+  const courses = [];
+  let cumulativeGPA = 0;
+  let totalCredits = 0;
+  let earnedCredits = 0;
+  let major = "";
 
-        // Extract term name and major
-        const termMatch = term.match(/(\d{4}\s(?:Fall|Spring|Summer)\sTerm)/);
-        const termName = termMatch ? termMatch[1].trim() : '';
-        
-        // Extract major if found
-        const majorMatch = term.match(/Computer Science Major/);
-        if (majorMatch) {
-            major = 'Computer Science';
+  // Split transcript into terms and clean up whitespace
+  const terms = transcriptText
+    .split(/(?=\d{4}\s(?:Fall|Spring|Summer)\sTerm)/)
+    .map((term) => term.trim());
+
+  terms.forEach((term) => {
+    if (!term) return;
+
+    // Extract term name and major
+    const termMatch = term.match(/(\d{4}\s(?:Fall|Spring|Summer)\sTerm)/);
+    const termName = termMatch ? termMatch[1].trim() : "";
+
+    // Extract major if found
+    const majorMatch = term.match(/Computer Science Major/);
+    if (majorMatch) {
+      major = "Computer Science";
+    }
+
+    console.log("Processing term:", termName);
+
+    // Split into lines and clean them
+    const lines = term.split("\n").map((line) => line.trim());
+
+    // Process each line for courses
+    lines.forEach((line) => {
+      // Updated pattern to match your transcript format
+      const courseMatch = line.match(
+        /^([A-Z]{2,3}\s\d{3}H?\.?\d*)\s+(.*?)\s+(\d+\.\d+)\s+([A-Z][+-]?)$/
+      );
+      if (courseMatch) {
+        console.log("Found course:", courseMatch[0]); // Debug log
+        const [_, courseId, courseName, credits, grade] = courseMatch;
+
+        const course = {
+          courseId: courseId.trim(),
+          courseName: courseName.trim(),
+          credits: parseFloat(credits),
+          grade: grade.trim(),
+          term: termName,
+        };
+
+        courses.push(course);
+        console.log("Added course:", course); // Debug log
+
+        // Update credit counts
+        const numCredits = parseFloat(credits);
+        if (!isNaN(numCredits)) {
+          totalCredits += numCredits;
+          earnedCredits += numCredits;
+          cumulativeGPA += numCredits * calculateGradeValue(grade);
         }
-        
-        console.log('Processing term:', termName);
-
-        // Split into lines and clean them
-        const lines = term.split('\n').map(line => line.trim());
-        
-        // Process each line for courses
-        lines.forEach(line => {
-            // Updated pattern to match your transcript format
-            const courseMatch = line.match(/^([A-Z]{2,3}\s\d{3}H?\.?\d*)\s+(.*?)\s+(\d+\.\d+)\s+([A-Z][+-]?)$/);
-            if (courseMatch) {
-                console.log('Found course:', courseMatch[0]); // Debug log
-                const [_, courseId, courseName, credits, grade] = courseMatch;
-                
-                const course = {
-                    courseId: courseId.trim(),
-                    courseName: courseName.trim(),
-                    credits: parseFloat(credits),
-                    grade: grade.trim(),
-                    term: termName
-                };
-
-                courses.push(course);
-                console.log('Added course:', course); // Debug log
-                
-                // Update credit counts
-                const numCredits = parseFloat(credits);
-                if (!isNaN(numCredits)) {
-                    totalCredits += numCredits;
-                    earnedCredits += numCredits;
-                    cumulativeGPA += numCredits * calculateGradeValue(grade);
-                }
-            }
-        });
+      }
     });
+  });
 
-    // Calculate final GPA
-    const calculatedGPA = totalCredits > 0 ? (cumulativeGPA / totalCredits).toFixed(3) : 0;
+  // Calculate final GPA
+  const calculatedGPA =
+    totalCredits > 0 ? (cumulativeGPA / totalCredits).toFixed(3) : 0;
 
-    // Extract official GPA if present, otherwise use calculated
-    const gpaMatch = transcriptText.match(/Cum GPA:\s*([\d.]+)/);
-    const officialGPA = gpaMatch ? parseFloat(gpaMatch[1]) : parseFloat(calculatedGPA);
+  // Extract official GPA if present, otherwise use calculated
+  const gpaMatch = transcriptText.match(/Cum GPA:\s*([\d.]+)/);
+  const officialGPA = gpaMatch
+    ? parseFloat(gpaMatch[1])
+    : parseFloat(calculatedGPA);
 
-    // Build result object
-    const analyzedData = {
-        major,
-        gpa: officialGPA,
-        courses,
-        completedCredits: earnedCredits,
-        skills: extractSkills(courses),
-        courseSummary: {
-            totalCourses: courses.length,
-            completedCredits: earnedCredits,
-            inProgressCredits: totalCredits - earnedCredits
-        },
-        lastUpdated: new Date(),
-        terms: Array.from(new Set(courses.map(course => course.term)))
-    };
+  // Build result object
+  const analyzedData = {
+    major,
+    gpa: officialGPA,
+    courses,
+    completedCredits: earnedCredits,
+    skills: extractSkills(courses),
+    courseSummary: {
+      totalCourses: courses.length,
+      completedCredits: earnedCredits,
+      inProgressCredits: totalCredits - earnedCredits,
+    },
+    lastUpdated: new Date(),
+    terms: Array.from(new Set(courses.map((course) => course.term))),
+  };
 
-    // Debug log the analyzed data
-    console.log('Course Analysis Results:', {
-        totalCourses: courses.length,
-        courses: courses.map(c => ({
-            id: c.courseId,
-            grade: c.grade,
-            term: c.term
-        })),
-        major,
-        gpa: officialGPA,
-        earnedCredits,
-        termsFound: analyzedData.terms,
-        skillsFound: analyzedData.skills.length
-    });
+  // Debug log the analyzed data
+  console.log("Course Analysis Results:", {
+    totalCourses: courses.length,
+    courses: courses.map((c) => ({
+      id: c.courseId,
+      grade: c.grade,
+      term: c.term,
+    })),
+    major,
+    gpa: officialGPA,
+    earnedCredits,
+    termsFound: analyzedData.terms,
+    skillsFound: analyzedData.skills.length,
+  });
 
-    return analyzedData;
+  return analyzedData;
 }
 
 // Helper functions remain the same
 function calculateGradeValue(grade) {
-    const gradeValues = {
-        'A': 4.0, 'A-': 3.7,
-        'B+': 3.3, 'B': 3.0, 'B-': 2.7,
-        'C+': 2.3, 'C': 2.0, 'C-': 1.7,
-        'D+': 1.3, 'D': 1.0,
-        'F': 0.0
-    };
-    return gradeValues[grade] || 0;
+  const gradeValues = {
+    A: 4.0,
+    "A-": 3.7,
+    "B+": 3.3,
+    B: 3.0,
+    "B-": 2.7,
+    "C+": 2.3,
+    C: 2.0,
+    "C-": 1.7,
+    "D+": 1.3,
+    D: 1.0,
+    F: 0.0,
+  };
+  return gradeValues[grade] || 0;
 }
 
 function extractSkills(courses) {
-    const skills = new Set();
-    
-    courses.forEach(course => {
-        const courseId = course.courseId.trim();
-        console.log('Extracting skills for course:', courseId); // Debug log
-        
-        // Course-specific skills
-        const courseSkills = {
-            'CSC 101': ['Computer Fundamentals', 'Information Technology', 'Digital Literacy'],
-            'CSC 111': ['Programming Fundamentals', 'Java Programming', 'Software Development'],
-            'CIS 385': ['Web Development', 'HTML/CSS', 'JavaScript'],
-            'MAT 301': ['Calculus', 'Analytical Geometry', 'Advanced Mathematics'],
-            'MAT 206.5': ['Pre-Calculus', 'Algebra', 'Mathematical Reasoning'],
-            'ENG 121': ['Academic Writing', 'Literature Analysis', 'Research Writing'],
-            'CRT 100': ['Critical Thinking', 'Analytical Reasoning', 'Logic'],
-            'SPE 100': ['Public Speaking', 'Oral Communication', 'Presentation Skills'],
-            'ECO 201H': ['Economic Analysis', 'Macroeconomics', 'Research Methods']
-        };
+  const skills = new Set();
 
-        if (courseSkills[courseId]) {
-            courseSkills[courseId].forEach(skill => {
-                console.log('Adding skill:', skill); // Debug log
-                skills.add(skill);
-            });
-        }
+  courses.forEach((course) => {
+    const courseId = course.courseId.trim();
+    console.log("Extracting skills for course:", courseId); // Debug log
 
-        // Add general skills based on course prefix
-        const prefix = courseId.split(' ')[0];
-        const generalSkills = {
-            'CSC': ['Computer Science', 'Technical Problem Solving'],
-            'CIS': ['Information Systems', 'Technical Documentation'],
-            'MAT': ['Mathematics', 'Analytical Thinking'],
-            'ENG': ['Written Communication', 'Composition'],
-            'SPE': ['Communication', 'Public Speaking'],
-            'CRT': ['Critical Analysis', 'Logical Reasoning'],
-            'ECO': ['Economic Principles', 'Data Analysis']
-        };
+    // Course-specific skills
+    const courseSkills = {
+      "CSC 101": [
+        "Computer Fundamentals",
+        "Information Technology",
+        "Digital Literacy",
+      ],
+      "CSC 111": [
+        "Programming Fundamentals",
+        "Java Programming",
+        "Software Development",
+      ],
+      "CIS 385": ["Web Development", "HTML/CSS", "JavaScript"],
+      "MAT 301": ["Calculus", "Analytical Geometry", "Advanced Mathematics"],
+      "MAT 206.5": ["Pre-Calculus", "Algebra", "Mathematical Reasoning"],
+      "ENG 121": [
+        "Academic Writing",
+        "Literature Analysis",
+        "Research Writing",
+      ],
+      "CRT 100": ["Critical Thinking", "Analytical Reasoning", "Logic"],
+      "SPE 100": [
+        "Public Speaking",
+        "Oral Communication",
+        "Presentation Skills",
+      ],
+      "ECO 201H": ["Economic Analysis", "Macroeconomics", "Research Methods"],
+    };
 
-        if (generalSkills[prefix]) {
-            generalSkills[prefix].forEach(skill => {
-                console.log('Adding general skill:', skill); // Debug log
-                skills.add(skill);
-            });
-        }
+    if (courseSkills[courseId]) {
+      courseSkills[courseId].forEach((skill) => {
+        console.log("Adding skill:", skill); // Debug log
+        skills.add(skill);
+      });
+    }
 
-        // Add honors designation if applicable
-        if (courseId.includes('H')) {
-            console.log('Adding honors skills'); // Debug log
-            skills.add('Honors Level Work');
-            skills.add('Advanced Academic Research');
-        }
-    });
+    // Add general skills based on course prefix
+    const prefix = courseId.split(" ")[0];
+    const generalSkills = {
+      CSC: ["Computer Science", "Technical Problem Solving"],
+      CIS: ["Information Systems", "Technical Documentation"],
+      MAT: ["Mathematics", "Analytical Thinking"],
+      ENG: ["Written Communication", "Composition"],
+      SPE: ["Communication", "Public Speaking"],
+      CRT: ["Critical Analysis", "Logical Reasoning"],
+      ECO: ["Economic Principles", "Data Analysis"],
+    };
 
-    return Array.from(skills);
+    if (generalSkills[prefix]) {
+      generalSkills[prefix].forEach((skill) => {
+        console.log("Adding general skill:", skill); // Debug log
+        skills.add(skill);
+      });
+    }
+
+    // Add honors designation if applicable
+    if (courseId.includes("H")) {
+      console.log("Adding honors skills"); // Debug log
+      skills.add("Honors Level Work");
+      skills.add("Advanced Academic Research");
+    }
+  });
+
+  return Array.from(skills);
 }
-
-
-
-
-
-
-
 
 // Error handling for undefined routes
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'index.html'));
+  res.status(404).sendFile(path.join(__dirname, "index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log('Users array initialized with admin user');
+  console.log(`Server running on port ${PORT}`);
+  console.log("Users array initialized with admin user");
 });
